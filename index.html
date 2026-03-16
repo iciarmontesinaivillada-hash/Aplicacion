@@ -369,15 +369,12 @@ window.addEventListener('popstate', function(e) {
     window.scrollTo({ top:0, behavior:'smooth' });
     if (prev === 's-live') loadLive();
   } else {
-    // Está en inicio — preguntar si quiere salir
-    const salir = confirm('¿Deseas salir de la aplicación?');
-    if (salir) {
-      history.back();
-    } else {
-      history.pushState({ screen: 's-home' }, '', '');
-    }
+    history.pushState({ screen: 's-home' }, '', '');
+    document.getElementById('exitDialog').style.display = 'flex';
   }
 });
+function hideExitDialog() { document.getElementById('exitDialog').style.display = 'none'; }
+function confirmExit() { history.go(-(history.length)); setTimeout(()=>{ window.close(); }, 200); }
 
 function openLink(u) { window.open(u, '_blank', 'noopener,noreferrer'); }
 
@@ -426,20 +423,16 @@ function loadLive() {
     msg.textContent = 'No hay transmisión activa. ¡Vuelve pronto para el próximo culto!';
     return;
   }
-  // Extraer ID de YouTube — soporta watch, youtu.be, live y shorts
+  // Abrir directo en la app de YouTube — evita bloqueos de embed
+  ph.style.display = 'flex';
+  iframe.style.display = 'none';
+  ph.style.cursor = 'pointer';
+  ph.onclick = () => openLink(url);
   const m = url.match(/(?:youtube\.com\/(?:watch\?v=|live\/|shorts\/)|youtu\.be\/)([A-Za-z0-9_-]{11})/);
   if (m) {
-    const embedUrl = `https://www.youtube-nocookie.com/embed/${m[1]}?autoplay=1&rel=0&playsinline=1`;
-    ph.style.display = 'none';
-    iframe.style.display = 'block';
-    if (iframe.src !== embedUrl) iframe.src = embedUrl;
+    msg.innerHTML = '<span style="font-size:36px">▶️</span><br><span style="font-size:15px;font-weight:500;color:#f7f9f5">Ver culto en YouTube</span><br><span style="font-size:12px;color:rgba(247,249,245,0.6);margin-top:4px;display:block">Toca para abrir</span>';
   } else {
-    // Si el link no es YouTube (ej. Facebook Live) — abrir en navegador
-    ph.style.display = 'flex';
-    iframe.style.display = 'none';
-    msg.innerHTML = 'Toca aquí para ver la transmisión en vivo';
-    ph.style.cursor = 'pointer';
-    ph.onclick = () => openLink(url);
+    msg.innerHTML = '<span style="font-size:36px">📺</span><br><span style="font-size:15px;font-weight:500;color:#f7f9f5">Ver transmisión en vivo</span><br><span style="font-size:12px;color:rgba(247,249,245,0.6);margin-top:4px;display:block">Toca para abrir</span>';
   }
 }
 
@@ -536,5 +529,18 @@ if ('serviceWorker' in navigator) {
 
 boot();
 </script>
+
+<!-- Diálogo salir -->
+<div id="exitDialog" style="display:none;position:fixed;inset:0;z-index:999;background:rgba(0,0,0,0.65);align-items:center;justify-content:center;">
+  <div style="background:#1a5c3a;border:1px solid rgba(200,168,75,0.4);border-radius:20px;padding:28px 24px;width:80%;max-width:300px;text-align:center;font-family:'Outfit',sans-serif;">
+    <div style="font-size:32px;margin-bottom:12px">🕊️</div>
+    <p style="font-size:16px;font-weight:500;color:#f7f9f5;margin-bottom:8px">¿Deseas salir?</p>
+    <p style="font-size:13px;color:rgba(247,249,245,0.6);margin-bottom:22px;line-height:1.5">¡Que Dios te bendiga!</p>
+    <div style="display:flex;gap:10px;">
+      <button onclick="hideExitDialog()" style="flex:1;padding:11px;border-radius:12px;border:1px solid rgba(200,168,75,0.4);background:transparent;color:#e8c96a;font-size:14px;font-weight:500;cursor:pointer;">Cancelar</button>
+      <button onclick="confirmExit()" style="flex:1;padding:11px;border-radius:12px;border:none;background:#c8a84b;color:#0b3520;font-size:14px;font-weight:600;cursor:pointer;">Salir</button>
+    </div>
+  </div>
+</div>
 </body>
 </html>
