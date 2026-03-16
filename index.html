@@ -335,7 +335,10 @@ window.addEventListener('popstate', function() {
     document.getElementById(prev).classList.add('active');
     window.scrollTo({ top: 0, behavior: 'smooth' });
     if (prev === 's-live') loadLive();
+    // Re-agregar estado para seguir capturando el back
+    history.pushState({ screen: prev }, '');
   } else {
+    // Siempre re-agregar estado para que el siguiente back también se capture
     history.pushState({ screen: 's-home' }, '');
     document.getElementById('exitDialog').classList.add('show');
   }
@@ -434,24 +437,10 @@ function loadLive() {
 function abrirYoutube() {
   var url = liveUrl.trim();
   if (!url) return;
-  // Extraer ID del video de YouTube
   var m = url.match(/(?:youtube\.com\/(?:watch\?v=|live\/|shorts\/)|youtu\.be\/)([A-Za-z0-9_-]{11})/);
-  if (m) {
-    var videoId = m[1];
-    // Intentar abrir app de YouTube nativa en Android
-    var intentUrl = 'intent://www.youtube.com/watch?v=' + videoId + '#Intent;package=com.google.android.youtube;scheme=https;end';
-    var a = document.createElement('a');
-    a.href = intentUrl;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    // Fallback: si no abre en 1.5s, abrir en navegador
-    setTimeout(function() {
-      window.open('https://www.youtube.com/watch?v=' + videoId, '_blank');
-    }, 1500);
-  } else {
-    window.open(url, '_blank');
-  }
+  var finalUrl = m ? 'https://www.youtube.com/watch?v=' + m[1] : url;
+  // Abrir directamente en nueva pestaña — funciona en todos los navegadores
+  window.open(finalUrl, '_blank', 'noopener,noreferrer');
 }
 
 // ══════════════════════════════════════════
