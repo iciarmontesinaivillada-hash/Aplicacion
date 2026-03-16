@@ -359,8 +359,24 @@ function show(id) {
   if (id === 's-live')                       loadLive();
 }
 
-// Botón físico de retroceder en Android
-window.addEventListener('popstate', function(e) {
+// ── Botón físico retroceder (compatible con TWA/Android) ──
+// En TWA el popstate no es confiable; usamos pagehide + un contador
+let backPressCount = 0;
+let backPressTimer = null;
+
+// Método 1: popstate (funciona en PWA normal)
+window.addEventListener('popstate', function() {
+  handleBack();
+});
+
+// Método 2: pagehide (funciona en algunos TWA)
+window.addEventListener('pagehide', function() {
+  if (navStack.length <= 1) {
+    document.getElementById('exitDialog').style.display = 'flex';
+  }
+});
+
+function handleBack() {
   if (navStack.length > 1) {
     navStack.pop();
     const prev = navStack[navStack.length - 1];
@@ -368,13 +384,27 @@ window.addEventListener('popstate', function(e) {
     document.getElementById(prev).classList.add('active');
     window.scrollTo({ top:0, behavior:'smooth' });
     if (prev === 's-live') loadLive();
+    history.pushState({ screen: prev }, '', '');
   } else {
     history.pushState({ screen: 's-home' }, '', '');
     document.getElementById('exitDialog').style.display = 'flex';
   }
-});
-function hideExitDialog() { document.getElementById('exitDialog').style.display = 'none'; }
-function confirmExit() { history.go(-(history.length)); setTimeout(()=>{ window.close(); }, 200); }
+}
+
+function hideExitDialog() {
+  document.getElementById('exitDialog').style.display = 'none';
+}
+
+function confirmExit() {
+  // Intentar cerrar de todas las formas posibles en Android TWA
+  try { window.Android && window.Android.closeApp(); } catch(e) {}
+  try { history.go(-999); } catch(e) {}
+  try { window.close(); } catch(e) {}
+  // Si nada funciona, minimizar mostrando pantalla de inicio del celular
+  setTimeout(() => {
+    try { window.location.href = 'about:blank'; } catch(e) {}
+  }, 300);
+}
 
 function openLink(u) { window.open(u, '_blank', 'noopener,noreferrer'); }
 
@@ -423,16 +453,39 @@ function loadLive() {
     msg.textContent = 'No hay transmisión activa. ¡Vuelve pronto para el próximo culto!';
     return;
   }
-  // Abrir directo en la app de YouTube — evita bloqueos de embed
+  // Abrir YouTube nativo en Android con intent://
   ph.style.display = 'flex';
   iframe.style.display = 'none';
   ph.style.cursor = 'pointer';
-  ph.onclick = () => openLink(url);
+
   const m = url.match(/(?:youtube\.com\/(?:watch\?v=|live\/|shorts\/)|youtu\.be\/)([A-Za-z0-9_-]{11})/);
   if (m) {
-    msg.innerHTML = '<span style="font-size:36px">▶️</span><br><span style="font-size:15px;font-weight:500;color:#f7f9f5">Ver culto en YouTube</span><br><span style="font-size:12px;color:rgba(247,249,245,0.6);margin-top:4px;display:block">Toca para abrir</span>';
+    const videoId = m[1];
+    // intent:// abre la app de YouTube directo en Android
+    const intentUrl = `intent://www.youtube.com/watch?v=${videoId}#Intent;package=com.google.android.youtube;scheme=https;end`;
+    const fallbackUrl = `https://www.youtube.com/watch?v=${videoId}`;
+    ph.onclick = () => {
+      // Intentar abrir app nativa, si falla abrir en navegador
+      const a = document.createElement('a');
+      a.href = intentUrl;
+      a.click();
+      // Fallback por si no tiene YouTube instalado
+      setTimeout(() => { window.open(fallbackUrl, '_blank'); }, 1500);
+    };
+    msg.innerHTML = \`
+      <span style="font-size:42px;display:block;margin-bottom:10px">▶️</span>
+      <span style="font-size:16px;font-weight:600;color:#f7f9f5;display:block;margin-bottom:6px">Culto en Vivo</span>
+      <span style="font-size:13px;color:rgba(247,249,245,0.65);display:block;margin-bottom:16px">Toca para abrir en YouTube</span>
+      <span style="background:#c8a84b;color:#0b3520;padding:10px 24px;border-radius:20px;font-size:13px;font-weight:600">Ver ahora</span>
+    \`;
   } else {
-    msg.innerHTML = '<span style="font-size:36px">📺</span><br><span style="font-size:15px;font-weight:500;color:#f7f9f5">Ver transmisión en vivo</span><br><span style="font-size:12px;color:rgba(247,249,245,0.6);margin-top:4px;display:block">Toca para abrir</span>';
+    ph.onclick = () => window.open(url, '_blank');
+    msg.innerHTML = \`
+      <span style="font-size:42px;display:block;margin-bottom:10px">📺</span>
+      <span style="font-size:16px;font-weight:600;color:#f7f9f5;display:block;margin-bottom:6px">Transmisión en Vivo</span>
+      <span style="font-size:13px;color:rgba(247,249,245,0.65);display:block;margin-bottom:16px">Toca para abrir</span>
+      <span style="background:#c8a84b;color:#0b3520;padding:10px 24px;border-radius:20px;font-size:13px;font-weight:600">Ver ahora</span>
+    \`;
   }
 }
 
