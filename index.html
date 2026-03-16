@@ -345,15 +345,39 @@ let DATA = null;
 let anunciosReady = false;
 let bibleReady = false;
 
-// Navegación
+// ── Navegación con historial para botón físico de retroceder ──
+let navStack = ['s-home'];
+
 function show(id) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.getElementById(id).classList.add('active');
   window.scrollTo({ top:0, behavior:'smooth' });
+  if (id !== navStack[navStack.length - 1]) navStack.push(id);
+  history.pushState({ screen: id }, '', '');
   if (id === 's-anuncios' && !anunciosReady) renderAnuncios();
   if (id === 's-biblia'   && !bibleReady)    initBible();
   if (id === 's-live')                       loadLive();
 }
+
+// Botón físico de retroceder en Android
+window.addEventListener('popstate', function(e) {
+  if (navStack.length > 1) {
+    navStack.pop();
+    const prev = navStack[navStack.length - 1];
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById(prev).classList.add('active');
+    window.scrollTo({ top:0, behavior:'smooth' });
+    if (prev === 's-live') loadLive();
+  } else {
+    // Está en inicio — preguntar si quiere salir
+    const salir = confirm('¿Deseas salir de la aplicación?');
+    if (salir) {
+      history.back();
+    } else {
+      history.pushState({ screen: 's-home' }, '', '');
+    }
+  }
+});
 
 function openLink(u) { window.open(u, '_blank', 'noopener,noreferrer'); }
 
@@ -361,7 +385,8 @@ function gotoLive() { show('s-live'); }
 
 // ── Carga Sheet o demo ────────────────────────────────
 async function boot() {
-  if (CFG.sheetId === '1JlGUE5NznkZHPw2Sp5JRod6PAgKlhb01zKzsOI_D3iA') { DATA = DEMO; revealHome(); return; }
+  history.replaceState({ screen: 's-home' }, '', '');
+  if (CFG.sheetId === 'TU_SHEET_ID_AQUI') { DATA = DEMO; revealHome(); return; }
   try {
     const url = `https://sheets.googleapis.com/v4/spreadsheets/${CFG.sheetId}/values/${CFG.tab}?key=${CFG.apiKey}`;
     const r = await fetch(url);
@@ -392,7 +417,7 @@ function revealHome() {
 
 // ── Culto en vivo ─────────────────────────────────────
 function loadLive() {
-  const url = DATA?.liveUrl || '';
+  const url = (DATA?.liveUrl || '').trim();
   const iframe = document.getElementById('liveIframe');
   const ph     = document.getElementById('livePH');
   const msg    = document.getElementById('liveMsg');
@@ -401,12 +426,21 @@ function loadLive() {
     msg.textContent = 'No hay transmisión activa. ¡Vuelve pronto para el próximo culto!';
     return;
   }
-  // Convertir a embed de YouTube
-  let embed = url;
-  const m = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/live\/)([^&?/]+)/);
-  if (m) embed = `https://www.youtube.com/embed/${m[1]}?autoplay=1&rel=0`;
-  ph.style.display = 'none'; iframe.style.display = 'block';
-  if (iframe.src !== embed) iframe.src = embed;
+  // Extraer ID de YouTube — soporta watch, youtu.be, live y shorts
+  const m = url.match(/(?:youtube\.com\/(?:watch\?v=|live\/|shorts\/)|youtu\.be\/)([A-Za-z0-9_-]{11})/);
+  if (m) {
+    const embedUrl = `https://www.youtube-nocookie.com/embed/${m[1]}?autoplay=1&rel=0&playsinline=1`;
+    ph.style.display = 'none';
+    iframe.style.display = 'block';
+    if (iframe.src !== embedUrl) iframe.src = embedUrl;
+  } else {
+    // Si el link no es YouTube (ej. Facebook Live) — abrir en navegador
+    ph.style.display = 'flex';
+    iframe.style.display = 'none';
+    msg.innerHTML = 'Toca aquí para ver la transmisión en vivo';
+    ph.style.cursor = 'pointer';
+    ph.onclick = () => openLink(url);
+  }
 }
 
 // ── Anuncios ──────────────────────────────────────────
