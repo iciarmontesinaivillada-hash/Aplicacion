@@ -21,7 +21,6 @@
       --g-deep:  #0b3520;
       --g-mid:   #1a5c3a;
       --g-light: #2e8a57;
-      --g-mist:  #4aaf7a;
       --gold:    #c8a84b;
       --gold-l:  #e8c96a;
       --gold-d:  rgba(200,168,75,0.30);
@@ -38,7 +37,6 @@
       display: flex; flex-direction: column; align-items: center;
       overflow-x: hidden;
     }
-    /* BG */
     .bg { position:fixed; inset:0; pointer-events:none; z-index:0; }
     .bg::before {
       content:''; position:absolute;
@@ -55,14 +53,12 @@
     @keyframes drift { from{transform:translate(0,0) scale(1)} to{transform:translate(30px,25px) scale(1.08)} }
     .top-bar { position:fixed; top:0; left:0; right:0; height:3px; z-index:100;
       background: linear-gradient(90deg, transparent, var(--gold), var(--gold-l), var(--gold), transparent); }
-    /* APP */
     .app {
       position:relative; z-index:1;
       width:100%; max-width:430px; min-height:100dvh;
       display:flex; flex-direction:column; align-items:center;
       padding: 0 18px calc(28px + env(safe-area-inset-bottom,0px));
     }
-    /* HEADER */
     .header {
       width:100%; display:flex; flex-direction:column; align-items:center;
       padding-top: calc(38px + env(safe-area-inset-top,0px));
@@ -76,40 +72,25 @@
     .logo-ring img { width:100%; height:100%; border-radius:50%; object-fit:cover; display:block; }
     .logo-fallback {
       width:100%; height:100%; border-radius:50%;
-      background:var(--g-mid); display:flex; align-items:center;
-      justify-content:center; font-size:38px; display:none;
+      background:var(--g-mid); display:none; align-items:center;
+      justify-content:center; font-size:38px;
     }
     @keyframes pulse {
       0%,100%{box-shadow:0 0 0 0 rgba(200,168,75,0.25),0 0 40px rgba(26,92,58,0.35)}
       50%{box-shadow:0 0 0 9px rgba(200,168,75,0),0 0 60px rgba(26,92,58,0.55)}
     }
-    .app-name {
-      font-family:'Cormorant Garamond',serif; font-size:36px; font-weight:700;
-      letter-spacing:2px; text-align:center; line-height:1;
-    }
-    .app-sub {
-      font-size:10px; font-weight:500; letter-spacing:4px; text-transform:uppercase;
-      color:var(--gold); margin-top:6px; text-align:center;
-    }
+    .app-name { font-family:'Cormorant Garamond',serif; font-size:36px; font-weight:700; letter-spacing:2px; text-align:center; line-height:1; }
+    .app-sub { font-size:10px; font-weight:500; letter-spacing:4px; text-transform:uppercase; color:var(--gold); margin-top:6px; text-align:center; }
     .h-line { width:50px; height:1px; background:linear-gradient(90deg,transparent,var(--gold),transparent); margin-top:14px; }
-    .live-badge {
-      display:none; align-items:center; gap:6px;
-      background:rgba(220,50,50,0.15); border:1px solid rgba(220,50,50,0.45);
-      border-radius:20px; padding:5px 14px;
-      font-size:11px; font-weight:600; letter-spacing:1.5px; text-transform:uppercase;
-      color:#ff7070; margin-top:12px;
-    }
+    .live-badge { display:none; align-items:center; gap:6px; background:rgba(220,50,50,0.15); border:1px solid rgba(220,50,50,0.45); border-radius:20px; padding:5px 14px; font-size:11px; font-weight:600; letter-spacing:1.5px; text-transform:uppercase; color:#ff7070; margin-top:12px; }
     .live-badge.show { display:flex; }
     .live-dot { width:6px; height:6px; border-radius:50%; background:#ff4444; animation:blink 1.2s ease-in-out infinite; }
     @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.15} }
-    /* SCREENS */
     .screen { display:none; width:100%; flex-direction:column; gap:13px; }
     .screen.active { display:flex; animation:fadeUp 0.35s ease both; }
     @keyframes fadeUp { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:translateY(0)} }
-    /* GRID */
     .grid2 { display:grid; grid-template-columns:1fr 1fr; gap:13px; }
     .span2 { grid-column:1/-1; }
-    /* CARD BTN */
     .cb {
       background:rgba(255,255,255,0.05); border:1px solid var(--gold-d);
       border-radius:var(--r); padding:20px 12px 16px;
@@ -125,61 +106,31 @@
     .cl { font-size:11px; font-weight:500; letter-spacing:1.5px; text-transform:uppercase; text-align:center; color:rgba(247,249,245,0.85); }
     .cl.gold { color:var(--gold-l); }
     .cl.red  { color:#ff9494; }
-    /* LOADING */
     .spin-wrap { width:100%; padding:28px; display:flex; flex-direction:column; align-items:center; gap:10px; }
     .spinner { width:26px; height:26px; border:2px solid rgba(200,168,75,0.18); border-top-color:var(--gold); border-radius:50%; animation:spin .8s linear infinite; }
     @keyframes spin { to{transform:rotate(360deg)} }
     .spin-txt { font-size:13px; color:var(--dim); }
-    /* SECTION HEADER */
     .sh { display:flex; flex-direction:column; align-items:center; margin-bottom:2px; }
     .sh h2 { font-family:'Cormorant Garamond',serif; font-size:26px; font-weight:600; text-align:center; }
     .sh-line { width:36px; height:1px; background:linear-gradient(90deg,transparent,var(--gold),transparent); margin-top:6px; }
-    /* BACK */
-    .back {
-      background:none; border:none; color:var(--gold);
-      font-family:'Outfit',sans-serif; font-size:12px; font-weight:500;
-      letter-spacing:2px; text-transform:uppercase;
-      cursor:pointer; padding:6px 0;
-      display:flex; align-items:center; gap:5px;
-      align-self:flex-start; opacity:.8; transition:opacity .2s;
-    }
+    .back { background:none; border:none; color:var(--gold); font-family:'Outfit',sans-serif; font-size:12px; font-weight:500; letter-spacing:2px; text-transform:uppercase; cursor:pointer; padding:6px 0; display:flex; align-items:center; gap:5px; align-self:flex-start; opacity:.8; transition:opacity .2s; }
     .back:hover { opacity:1; }
-    /* SOCIAL */
-    .soc {
-      display:flex; align-items:center; gap:14px;
-      background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.09);
-      border-radius:14px; padding:15px 18px;
-      cursor:pointer; text-decoration:none; color:var(--white);
-      transition:all .2s ease;
-    }
+    .soc { display:flex; align-items:center; gap:14px; background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.09); border-radius:14px; padding:15px 18px; cursor:pointer; text-decoration:none; color:var(--white); transition:all .2s ease; }
     .soc:active { background:rgba(255,255,255,0.09); border-color:var(--gold-d); transform:translateX(4px); }
     .si { width:40px; height:40px; border-radius:11px; display:flex; align-items:center; justify-content:center; font-size:19px; flex-shrink:0; }
     .si-fb{background:#1877f2} .si-yt{background:#ff0000} .si-ig{background:linear-gradient(135deg,#833ab4,#fd1d1d,#fcb045)} .si-tt{background:#111;border:1px solid #333}
     .sn { font-size:14px; font-weight:500; } .sh2 { font-size:11px; color:var(--dim); margin-top:2px; }
     .sa { color:var(--gold); opacity:.6; font-size:14px; }
-    /* ANUNCIOS */
     .ac { background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.09); border-radius:14px; padding:16px 18px; }
     .ac-fecha { font-size:10px; font-weight:500; letter-spacing:2px; text-transform:uppercase; color:var(--gold); margin-bottom:6px; }
     .ac-titulo { font-size:15px; font-weight:500; margin-bottom:5px; }
     .ac-desc { font-size:13px; color:rgba(247,249,245,0.70); line-height:1.65; }
-    /* LIVE */
-    .live-frame-wrap {
-      width:100%; aspect-ratio:16/9; border-radius:14px; overflow:hidden;
-      border:1px solid rgba(220,50,50,0.28); background:#000; position:relative;
-    }
-    .live-frame-wrap iframe { width:100%; height:100%; border:none; display:block; }
-    .live-ph { width:100%; height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:10px; padding:20px; text-align:center; }
-    .live-ph span { font-size:42px; }
-    .live-ph p { font-size:14px; color:var(--dim); line-height:1.65; }
-    /* BIBLIA */
+    .live-frame-wrap { width:100%; border-radius:14px; overflow:hidden; border:1px solid rgba(220,50,50,0.28); background:#111; }
+    .live-ph { width:100%; padding:40px 20px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px; text-align:center; cursor:pointer; }
+    .live-ph:active { opacity:0.8; }
     .bw { background:rgba(255,255,255,0.04); border:1px solid var(--gold-d); border-radius:var(--r); overflow:hidden; }
     .bc { display:flex; gap:8px; padding:12px; border-bottom:1px solid rgba(255,255,255,0.07); flex-wrap:wrap; }
-    .bsel {
-      flex:1; min-width:100px; background:rgba(255,255,255,0.07);
-      border:1px solid rgba(255,255,255,0.13); border-radius:10px;
-      color:var(--white); font-family:'Outfit',sans-serif; font-size:13px;
-      padding:9px 11px; cursor:pointer; -webkit-appearance:none; appearance:none;
-    }
+    .bsel { flex:1; min-width:100px; background:rgba(255,255,255,0.07); border:1px solid rgba(255,255,255,0.13); border-radius:10px; color:var(--white); font-family:'Outfit',sans-serif; font-size:13px; padding:9px 11px; cursor:pointer; -webkit-appearance:none; appearance:none; }
     .bsel option { background:#0b3520; color:#f7f9f5; }
     .bgo { background:var(--gold); border:none; border-radius:10px; color:var(--g-deep); font-family:'Outfit',sans-serif; font-size:13px; font-weight:600; padding:9px 16px; cursor:pointer; transition:transform .15s; white-space:nowrap; }
     .bgo:active { transform:scale(0.96); }
@@ -188,16 +139,19 @@
     .verse { font-size:14px; line-height:1.9; color:rgba(247,249,245,0.87); margin-bottom:4px; }
     .verse sup { font-size:9px; color:var(--gold); margin-right:3px; vertical-align:super; }
     .bhint { font-size:13px; color:var(--dim); text-align:center; padding:28px 0; }
-    /* SCROLLBAR */
     ::-webkit-scrollbar{width:3px} ::-webkit-scrollbar-track{background:transparent} ::-webkit-scrollbar-thumb{background:rgba(200,168,75,0.3);border-radius:2px}
-    /* UPDATE TOAST */
-    .update-bar {
-      display:none; position:fixed; bottom:20px; left:50%; transform:translateX(-50%);
-      background:var(--g-mid); border:1px solid var(--gold-d); border-radius:30px;
-      padding:10px 20px; font-size:12px; color:var(--gold-l); z-index:200;
-      cursor:pointer; white-space:nowrap; box-shadow:0 4px 22px rgba(0,0,0,0.45);
-    }
+    .update-bar { display:none; position:fixed; bottom:20px; left:50%; transform:translateX(-50%); background:var(--g-mid); border:1px solid var(--gold-d); border-radius:30px; padding:10px 20px; font-size:12px; color:var(--gold-l); z-index:200; cursor:pointer; white-space:nowrap; box-shadow:0 4px 22px rgba(0,0,0,0.45); }
     .update-bar.show { display:block; }
+    /* EXIT DIALOG */
+    .exit-overlay { display:none; position:fixed; inset:0; z-index:999; background:rgba(0,0,0,0.7); align-items:center; justify-content:center; }
+    .exit-overlay.show { display:flex; }
+    .exit-box { background:#1a5c3a; border:1px solid rgba(200,168,75,0.4); border-radius:20px; padding:30px 24px; width:82%; max-width:300px; text-align:center; font-family:'Outfit',sans-serif; }
+    .exit-icon { font-size:36px; margin-bottom:14px; }
+    .exit-title { font-size:17px; font-weight:600; color:var(--white); margin-bottom:8px; }
+    .exit-sub { font-size:13px; color:var(--dim); margin-bottom:24px; line-height:1.5; }
+    .exit-btns { display:flex; gap:10px; }
+    .exit-cancel { flex:1; padding:12px; border-radius:12px; border:1px solid rgba(200,168,75,0.4); background:transparent; color:var(--gold-l); font-size:14px; font-weight:500; cursor:pointer; font-family:'Outfit',sans-serif; }
+    .exit-confirm { flex:1; padding:12px; border-radius:12px; border:none; background:var(--gold); color:var(--g-deep); font-size:14px; font-weight:600; cursor:pointer; font-family:'Outfit',sans-serif; }
   </style>
 </head>
 <body>
@@ -205,7 +159,6 @@
 <div class="top-bar"></div>
 
 <div class="app">
-  <!-- HEADER -->
   <header class="header">
     <div class="logo-ring">
       <img src="icon-512.png" alt="Logo" onerror="this.style.display='none';document.querySelector('.logo-fallback').style.display='flex'" />
@@ -217,7 +170,7 @@
     <div class="live-badge" id="liveBadge"><div class="live-dot"></div>En vivo ahora</div>
   </header>
 
-  <!-- ══ HOME ══ -->
+  <!-- HOME -->
   <div class="screen active" id="s-home">
     <div id="homeLoad" class="spin-wrap">
       <div class="spinner"></div>
@@ -225,7 +178,7 @@
     </div>
     <div id="homeContent" style="display:none;width:100%">
       <div class="grid2">
-        <button class="cb clive span2" id="btnLive" onclick="gotoLive()">
+        <button class="cb clive span2" id="btnLive" onclick="show('s-live')">
           <span class="ci">📺</span>
           <span class="cl red" id="lblLive">Culto en Vivo</span>
         </button>
@@ -245,25 +198,24 @@
     </div>
   </div>
 
-  <!-- ══ LIVE ══ -->
+  <!-- CULTO EN VIVO -->
   <div class="screen" id="s-live">
     <button class="back" onclick="show('s-home')">← Inicio</button>
     <div class="sh"><h2>Culto en Vivo</h2><div class="sh-line"></div></div>
     <div class="live-frame-wrap">
-      <div class="live-ph" id="livePH">
-        <span>🕊️</span>
-        <p id="liveMsg">Verificando transmisión…</p>
+      <div class="live-ph" id="livePH" onclick="abrirYoutube()">
+        <span id="liveIcon" style="font-size:44px;display:block;margin-bottom:12px">🕊️</span>
+        <span id="liveTitulo" style="font-size:16px;font-weight:600;color:#f7f9f5;display:block;margin-bottom:6px"></span>
+        <span id="liveMsg" style="font-size:13px;color:rgba(247,249,245,0.6);display:block;margin-bottom:18px">Cargando…</span>
+        <span id="liveBtnVer" style="display:none;background:#c8a84b;color:#0b3520;padding:11px 28px;border-radius:22px;font-size:14px;font-weight:600">Ver ahora</span>
       </div>
-      <iframe id="liveIframe" style="display:none"
-        allow="accelerometer;autoplay;clipboard-write;encrypted-media;gyroscope;picture-in-picture"
-        allowfullscreen></iframe>
     </div>
     <p style="font-size:12px;color:var(--dim);text-align:center;line-height:1.65">
-      El enlace de transmisión se actualiza automáticamente<br>antes de cada culto. ¡Bendiciones!
+      El enlace se actualiza automáticamente antes de cada culto.
     </p>
   </div>
 
-  <!-- ══ REDES ══ -->
+  <!-- REDES -->
   <div class="screen" id="s-redes">
     <button class="back" onclick="show('s-home')">← Inicio</button>
     <div class="sh"><h2>Redes Sociales</h2><div class="sh-line"></div></div>
@@ -289,7 +241,7 @@
     </a>
   </div>
 
-  <!-- ══ ANUNCIOS ══ -->
+  <!-- ANUNCIOS -->
   <div class="screen" id="s-anuncios">
     <button class="back" onclick="show('s-home')">← Inicio</button>
     <div class="sh"><h2>Anuncios</h2><div class="sh-line"></div></div>
@@ -298,7 +250,7 @@
     </div>
   </div>
 
-  <!-- ══ BIBLIA ══ -->
+  <!-- BIBLIA -->
   <div class="screen" id="s-biblia">
     <button class="back" onclick="show('s-home')">← Inicio</button>
     <div class="sh"><h2>Biblia RV1960</h2><div class="sh-line"></div></div>
@@ -315,196 +267,219 @@
   </div>
 </div>
 
+<!-- UPDATE BAR -->
 <div class="update-bar" id="updateBar" onclick="location.reload()">🔄 Hay nuevo contenido – toca para actualizar</div>
 
+<!-- DIÁLOGO SALIR -->
+<div class="exit-overlay" id="exitDialog">
+  <div class="exit-box">
+    <div class="exit-icon">🕊️</div>
+    <div class="exit-title">¿Deseas salir?</div>
+    <div class="exit-sub">¡Que Dios te bendiga hoy!</div>
+    <div class="exit-btns">
+      <button class="exit-cancel" onclick="cerrarDialogo()">Cancelar</button>
+      <button class="exit-confirm" onclick="salirApp()">Salir</button>
+    </div>
+  </div>
+</div>
+
 <script>
-// ════════════════════════════════════════════════════════
-//  ★ CONFIGURACIÓN — edita estos valores con tu Sheet
-// ════════════════════════════════════════════════════════
+// ══════════════════════════════════════════
+//  CONFIGURACIÓN
+// ══════════════════════════════════════════
 const CFG = {
-  sheetId:  '1JlGUE5NznkZHPw2Sp5JRod6PAgKlhb01zKzsOI_D3iA',      // ← ID del Google Sheet
-  apiKey:   'AIzaSyBrv-qabRQp58diCQaO96fvShts0U4ST_E',       // ← API Key de Google
-  tab:      'Config'                  // ← nombre de la pestaña
+  sheetId: '1JlGUE5NznkZHPw2Sp5JRod6PAgKlhb01zKzsOI_D3iA',
+  apiKey:  'AIzaSyBrv-qabRQp58diCQaO96fvShts0U4ST_E',
+  tab:     'Config'
 };
 
-// ════════════════════════════════════════════════════════
-//  DATOS DE DEMOSTRACIÓN (activos hasta configurar Sheet)
-// ════════════════════════════════════════════════════════
 const DEMO = {
-  liveUrl:   '',            // pega aquí un link de YouTube para probar
+  liveUrl: '',
   liveLabel: 'Culto en Vivo',
   anuncios: [
-    { fecha:'Domingo 16 Mar', titulo:'¡Culto de adoración!',   desc:'Este domingo a las 11:00 AM. Ven con tu familia. ¡Te esperamos!' },
-    { fecha:'Miércoles 19 Mar', titulo:'Estudio Bíblico',      desc:'A las 7:00 PM. Trae tu Biblia.' },
-    { fecha:'Próximamente',    titulo:'Retiro de Jóvenes',      desc:'Más información en las próximas semanas.' }
+    { fecha:'Domingo', titulo:'¡Culto de adoración!', desc:'A las 11:00 AM. ¡Te esperamos!' },
+    { fecha:'Miércoles', titulo:'Estudio Bíblico', desc:'7:00 PM. Trae tu Biblia.' }
   ]
 };
 
-// ════════════════════════════════════════════════════════
+// ══════════════════════════════════════════
+//  ESTADO
+// ══════════════════════════════════════════
 let DATA = null;
 let anunciosReady = false;
 let bibleReady = false;
-
-// ── Navegación con historial para botón físico de retroceder ──
 let navStack = ['s-home'];
+let liveUrl = '';
 
+// ══════════════════════════════════════════
+//  NAVEGACIÓN
+// ══════════════════════════════════════════
 function show(id) {
-  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.screen').forEach(function(s) { s.classList.remove('active'); });
   document.getElementById(id).classList.add('active');
-  window.scrollTo({ top:0, behavior:'smooth' });
-  if (id !== navStack[navStack.length - 1]) navStack.push(id);
-  history.pushState({ screen: id }, '', '');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+  if (navStack[navStack.length - 1] !== id) {
+    navStack.push(id);
+    history.pushState({ screen: id }, '');
+  }
   if (id === 's-anuncios' && !anunciosReady) renderAnuncios();
   if (id === 's-biblia'   && !bibleReady)    initBible();
   if (id === 's-live')                       loadLive();
 }
 
-// ── Botón físico retroceder (compatible con TWA/Android) ──
-// En TWA el popstate no es confiable; usamos pagehide + un contador
-let backPressCount = 0;
-let backPressTimer = null;
-
-// Método 1: popstate (funciona en PWA normal)
 window.addEventListener('popstate', function() {
-  handleBack();
-});
-
-// Método 2: pagehide (funciona en algunos TWA)
-window.addEventListener('pagehide', function() {
-  if (navStack.length <= 1) {
-    document.getElementById('exitDialog').style.display = 'flex';
-  }
-});
-
-function handleBack() {
   if (navStack.length > 1) {
     navStack.pop();
-    const prev = navStack[navStack.length - 1];
-    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    var prev = navStack[navStack.length - 1];
+    document.querySelectorAll('.screen').forEach(function(s) { s.classList.remove('active'); });
     document.getElementById(prev).classList.add('active');
-    window.scrollTo({ top:0, behavior:'smooth' });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
     if (prev === 's-live') loadLive();
-    history.pushState({ screen: prev }, '', '');
   } else {
-    history.pushState({ screen: 's-home' }, '', '');
-    document.getElementById('exitDialog').style.display = 'flex';
+    history.pushState({ screen: 's-home' }, '');
+    document.getElementById('exitDialog').classList.add('show');
   }
+});
+
+function cerrarDialogo() {
+  document.getElementById('exitDialog').classList.remove('show');
 }
 
-function hideExitDialog() {
-  document.getElementById('exitDialog').style.display = 'none';
-}
-
-function confirmExit() {
-  // Intentar cerrar de todas las formas posibles en Android TWA
-  try { window.Android && window.Android.closeApp(); } catch(e) {}
-  try { history.go(-999); } catch(e) {}
-  try { window.close(); } catch(e) {}
-  // Si nada funciona, minimizar mostrando pantalla de inicio del celular
-  setTimeout(() => {
+function salirApp() {
+  document.getElementById('exitDialog').classList.remove('show');
+  // Múltiples intentos para cerrar en Android TWA
+  try { history.go(-history.length); } catch(e) {}
+  setTimeout(function() {
+    try { window.close(); } catch(e) {}
+  }, 100);
+  setTimeout(function() {
     try { window.location.href = 'about:blank'; } catch(e) {}
   }, 300);
 }
 
-function openLink(u) { window.open(u, '_blank', 'noopener,noreferrer'); }
+function openLink(u) {
+  window.open(u, '_blank', 'noopener,noreferrer');
+}
 
-function gotoLive() { show('s-live'); }
-
-// ── Carga Sheet o demo ────────────────────────────────
+// ══════════════════════════════════════════
+//  CARGA GOOGLE SHEET
+// ══════════════════════════════════════════
 async function boot() {
-  history.replaceState({ screen: 's-home' }, '', '');
-  if (CFG.sheetId === 'TU_SHEET_ID_AQUI') { DATA = DEMO; revealHome(); return; }
+  history.replaceState({ screen: 's-home' }, '');
   try {
-    const url = `https://sheets.googleapis.com/v4/spreadsheets/${CFG.sheetId}/values/${CFG.tab}?key=${CFG.apiKey}`;
-    const r = await fetch(url);
-    const j = await r.json();
-    const map = {};
-    (j.values || []).forEach(row => { if (row[0]) map[row[0].trim()] = row[1] || ''; });
-    const anuncios = [];
-    for (let i = 1; i <= 6; i++) {
-      if (map[`anuncio_titulo_${i}`]) anuncios.push({
-        fecha:  map[`anuncio_fecha_${i}`]  || '',
-        titulo: map[`anuncio_titulo_${i}`],
-        desc:   map[`anuncio_desc_${i}`]   || ''
-      });
+    var url = 'https://sheets.googleapis.com/v4/spreadsheets/' + CFG.sheetId + '/values/' + CFG.tab + '?key=' + CFG.apiKey;
+    var r = await fetch(url);
+    if (!r.ok) throw new Error('sheet error');
+    var j = await r.json();
+    var map = {};
+    (j.values || []).forEach(function(row) { if (row[0]) map[row[0].trim()] = row[1] || ''; });
+    var anuncios = [];
+    for (var i = 1; i <= 6; i++) {
+      if (map['anuncio_titulo_' + i]) {
+        anuncios.push({
+          fecha:  map['anuncio_fecha_'  + i] || '',
+          titulo: map['anuncio_titulo_' + i],
+          desc:   map['anuncio_desc_'   + i] || ''
+        });
+      }
     }
-    DATA = { liveUrl: map['live_url'] || '', liveLabel: map['live_label'] || 'Culto en Vivo', anuncios };
-    revealHome();
-  } catch(e) { DATA = DEMO; revealHome(); }
+    DATA = {
+      liveUrl:   map['live_url']   || '',
+      liveLabel: map['live_label'] || 'Culto en Vivo',
+      anuncios:  anuncios
+    };
+  } catch(e) {
+    DATA = DEMO;
+  }
+  revealHome();
 }
 
 function revealHome() {
   document.getElementById('homeLoad').style.display = 'none';
   document.getElementById('homeContent').style.display = 'block';
-  const isLive = DATA.liveUrl && DATA.liveUrl.trim();
-  document.getElementById('liveBadge').classList.toggle('show', !!isLive);
+  var isLive = DATA.liveUrl && DATA.liveUrl.trim() !== '';
+  document.getElementById('liveBadge').classList.toggle('show', isLive);
   document.getElementById('lblLive').textContent = DATA.liveLabel;
   if (isLive) document.getElementById('btnLive').style.borderColor = 'rgba(220,50,50,0.65)';
+  liveUrl = DATA.liveUrl || '';
 }
 
-// ── Culto en vivo ─────────────────────────────────────
+// ══════════════════════════════════════════
+//  CULTO EN VIVO
+// ══════════════════════════════════════════
 function loadLive() {
-  const url = (DATA?.liveUrl || '').trim();
-  const iframe = document.getElementById('liveIframe');
-  const ph     = document.getElementById('livePH');
-  const msg    = document.getElementById('liveMsg');
+  var url = liveUrl.trim();
+  var icon    = document.getElementById('liveIcon');
+  var titulo  = document.getElementById('liveTitulo');
+  var msg     = document.getElementById('liveMsg');
+  var btnVer  = document.getElementById('liveBtnVer');
+
   if (!url) {
-    ph.style.display = 'flex'; iframe.style.display = 'none';
-    msg.textContent = 'No hay transmisión activa. ¡Vuelve pronto para el próximo culto!';
+    icon.textContent   = '🕊️';
+    titulo.textContent = 'Sin transmisión activa';
+    msg.textContent    = 'Vuelve pronto para el próximo culto';
+    btnVer.style.display = 'none';
+    document.getElementById('livePH').style.cursor = 'default';
+    document.getElementById('livePH').onclick = null;
     return;
   }
-  // Abrir YouTube nativo en Android con intent://
-  ph.style.display = 'flex';
-  iframe.style.display = 'none';
-  ph.style.cursor = 'pointer';
 
-  const m = url.match(/(?:youtube\.com\/(?:watch\?v=|live\/|shorts\/)|youtu\.be\/)([A-Za-z0-9_-]{11})/);
+  icon.textContent   = '▶️';
+  titulo.textContent = 'Culto en Vivo';
+  msg.textContent    = 'Toca para abrir en YouTube';
+  btnVer.style.display = 'inline-block';
+  document.getElementById('livePH').style.cursor = 'pointer';
+}
+
+function abrirYoutube() {
+  var url = liveUrl.trim();
+  if (!url) return;
+  // Extraer ID del video de YouTube
+  var m = url.match(/(?:youtube\.com\/(?:watch\?v=|live\/|shorts\/)|youtu\.be\/)([A-Za-z0-9_-]{11})/);
   if (m) {
-    const videoId = m[1];
-    // intent:// abre la app de YouTube directo en Android
-    const intentUrl = `intent://www.youtube.com/watch?v=${videoId}#Intent;package=com.google.android.youtube;scheme=https;end`;
-    const fallbackUrl = `https://www.youtube.com/watch?v=${videoId}`;
-    ph.onclick = () => {
-      // Intentar abrir app nativa, si falla abrir en navegador
-      const a = document.createElement('a');
-      a.href = intentUrl;
-      a.click();
-      // Fallback por si no tiene YouTube instalado
-      setTimeout(() => { window.open(fallbackUrl, '_blank'); }, 1500);
-    };
-    msg.innerHTML = \`
-      <span style="font-size:42px;display:block;margin-bottom:10px">▶️</span>
-      <span style="font-size:16px;font-weight:600;color:#f7f9f5;display:block;margin-bottom:6px">Culto en Vivo</span>
-      <span style="font-size:13px;color:rgba(247,249,245,0.65);display:block;margin-bottom:16px">Toca para abrir en YouTube</span>
-      <span style="background:#c8a84b;color:#0b3520;padding:10px 24px;border-radius:20px;font-size:13px;font-weight:600">Ver ahora</span>
-    \`;
+    var videoId = m[1];
+    // Intentar abrir app de YouTube nativa en Android
+    var intentUrl = 'intent://www.youtube.com/watch?v=' + videoId + '#Intent;package=com.google.android.youtube;scheme=https;end';
+    var a = document.createElement('a');
+    a.href = intentUrl;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    // Fallback: si no abre en 1.5s, abrir en navegador
+    setTimeout(function() {
+      window.open('https://www.youtube.com/watch?v=' + videoId, '_blank');
+    }, 1500);
   } else {
-    ph.onclick = () => window.open(url, '_blank');
-    msg.innerHTML = \`
-      <span style="font-size:42px;display:block;margin-bottom:10px">📺</span>
-      <span style="font-size:16px;font-weight:600;color:#f7f9f5;display:block;margin-bottom:6px">Transmisión en Vivo</span>
-      <span style="font-size:13px;color:rgba(247,249,245,0.65);display:block;margin-bottom:16px">Toca para abrir</span>
-      <span style="background:#c8a84b;color:#0b3520;padding:10px 24px;border-radius:20px;font-size:13px;font-weight:600">Ver ahora</span>
-    \`;
+    window.open(url, '_blank');
   }
 }
 
-// ── Anuncios ──────────────────────────────────────────
+// ══════════════════════════════════════════
+//  ANUNCIOS
+// ══════════════════════════════════════════
 function renderAnuncios() {
   anunciosReady = true;
-  const c = document.getElementById('anunciosCont');
-  const lista = DATA?.anuncios || [];
-  if (!lista.length) { c.innerHTML = '<p class="bhint">Sin anuncios por ahora.</p>'; return; }
-  c.innerHTML = lista.map(a => `
-    <div class="ac" style="margin-bottom:12px">
-      ${a.fecha  ? `<div class="ac-fecha">${a.fecha}</div>` : ''}
-      <div class="ac-titulo">${a.titulo}</div>
-      ${a.desc ? `<div class="ac-desc">${a.desc}</div>` : ''}
-    </div>`).join('');
+  var c = document.getElementById('anunciosCont');
+  var lista = (DATA && DATA.anuncios) ? DATA.anuncios : [];
+  if (!lista.length) {
+    c.innerHTML = '<p class="bhint">Sin anuncios por ahora.</p>';
+    return;
+  }
+  var html = '';
+  lista.forEach(function(a) {
+    html += '<div class="ac" style="margin-bottom:12px">';
+    if (a.fecha)  html += '<div class="ac-fecha">'  + a.fecha  + '</div>';
+    if (a.titulo) html += '<div class="ac-titulo">' + a.titulo + '</div>';
+    if (a.desc)   html += '<div class="ac-desc">'   + a.desc   + '</div>';
+    html += '</div>';
+  });
+  c.innerHTML = html;
 }
 
-// ── Biblia ────────────────────────────────────────────
-const LIBROS = [
+// ══════════════════════════════════════════
+//  BIBLIA RV1960
+// ══════════════════════════════════════════
+var LIBROS = [
   ['Génesis','GEN'],['Éxodo','EXO'],['Levítico','LEV'],['Números','NUM'],['Deuteronomio','DEU'],
   ['Josué','JOS'],['Jueces','JDG'],['Rut','RUT'],['1 Samuel','1SA'],['2 Samuel','2SA'],
   ['1 Reyes','1KI'],['2 Reyes','2KI'],['1 Crónicas','1CH'],['2 Crónicas','2CH'],['Esdras','EZR'],
@@ -520,7 +495,7 @@ const LIBROS = [
   ['Santiago','JAS'],['1 Pedro','1PE'],['2 Pedro','2PE'],['1 Juan','1JN'],['2 Juan','2JN'],
   ['3 Juan','3JN'],['Judas','JUD'],['Apocalipsis','REV']
 ];
-const CAPS = {
+var CAPS = {
   GEN:50,EXO:40,LEV:27,NUM:36,DEU:34,JOS:24,JDG:21,RUT:4,'1SA':31,'2SA':24,
   '1KI':22,'2KI':25,'1CH':29,'2CH':36,EZR:10,NEH:13,EST:10,JOB:42,PSA:150,
   PRO:31,ECC:12,SNG:8,ISA:66,JER:52,LAM:5,EZK:48,DAN:12,HOS:14,JOL:3,AMO:9,
@@ -532,49 +507,56 @@ const CAPS = {
 
 function initBible() {
   bibleReady = true;
-  const sel = document.getElementById('bookSel');
-  LIBROS.forEach(([name,code]) => {
-    const o = document.createElement('option');
-    o.value = code; o.textContent = name; sel.appendChild(o);
+  var sel = document.getElementById('bookSel');
+  LIBROS.forEach(function(b) {
+    var o = document.createElement('option');
+    o.value = b[1]; o.textContent = b[0]; sel.appendChild(o);
   });
   fillCaps();
 }
 
 function fillCaps() {
-  const code = document.getElementById('bookSel').value;
-  const sel  = document.getElementById('capSel');
+  var code = document.getElementById('bookSel').value;
+  var sel  = document.getElementById('capSel');
   sel.innerHTML = '';
-  for (let i = 1; i <= (CAPS[code]||1); i++) {
-    const o = document.createElement('option'); o.value = i; o.textContent = i; sel.appendChild(o);
+  var total = CAPS[code] || 1;
+  for (var i = 1; i <= total; i++) {
+    var o = document.createElement('option');
+    o.value = i; o.textContent = i; sel.appendChild(o);
   }
 }
 
 async function loadVerse() {
-  const code = document.getElementById('bookSel').value;
-  const cap  = document.getElementById('capSel').value;
-  const name = LIBROS.find(([,c]) => c === code)?.[0] || code;
-  const div  = document.getElementById('bibleText');
+  var code = document.getElementById('bookSel').value;
+  var cap  = document.getElementById('capSel').value;
+  var name = '';
+  LIBROS.forEach(function(b) { if (b[1] === code) name = b[0]; });
+  var div = document.getElementById('bibleText');
   div.innerHTML = '<div class="spin-wrap"><div class="spinner"></div><p class="spin-txt">Cargando…</p></div>';
   try {
-    const res = await fetch(`https://bible-api.com/${code}+${cap}?translation=rv1960`);
-    if (!res.ok) throw 0;
-    const d = await res.json();
-    div.innerHTML = `<div class="bref">${name} ${cap}</div>` +
-      (d.verses||[]).map(v => `<p class="verse"><sup>${v.verse}</sup>${v.text.trim()}</p>`).join('');
-  } catch {
-    div.innerHTML = `<div class="bref">${name} ${cap}</div>
-      <p class="verse"><sup>1</sup>Porque de tal manera amó Dios al mundo, que ha dado a su Hijo unigénito, para que todo aquel que en él cree, no se pierda, mas tenga vida eterna. (Juan 3:16)</p>
-      <p class="bhint" style="margin-top:14px">⚠️ Se requiere internet para cargar los capítulos.</p>`;
+    var res = await fetch('https://bible-api.com/' + code + '+' + cap + '?translation=rv1960');
+    if (!res.ok) throw new Error('no data');
+    var d = await res.json();
+    var html = '<div class="bref">' + name + ' ' + cap + '</div>';
+    (d.verses || []).forEach(function(v) {
+      html += '<p class="verse"><sup>' + v.verse + '</sup>' + v.text.trim() + '</p>';
+    });
+    div.innerHTML = html;
+  } catch(e) {
+    div.innerHTML = '<div class="bref">' + name + ' ' + cap + '</div><p class="verse"><sup>16</sup>Porque de tal manera amó Dios al mundo, que ha dado a su Hijo unigénito, para que todo aquel que en él cree, no se pierda, mas tenga vida eterna.</p><p class="bhint" style="margin-top:14px">⚠️ Se requiere internet para cargar los capítulos.</p>';
   }
 }
 
-// ── Service Worker ────────────────────────────────────
+// ══════════════════════════════════════════
+//  SERVICE WORKER
+// ══════════════════════════════════════════
 if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('sw.js').then(reg => {
-    reg.addEventListener('updatefound', () => {
+  navigator.serviceWorker.register('sw.js').then(function(reg) {
+    reg.addEventListener('updatefound', function() {
       reg.installing.addEventListener('statechange', function() {
-        if (this.state === 'installed' && navigator.serviceWorker.controller)
+        if (this.state === 'installed' && navigator.serviceWorker.controller) {
           document.getElementById('updateBar').classList.add('show');
+        }
       });
     });
   });
@@ -582,18 +564,5 @@ if ('serviceWorker' in navigator) {
 
 boot();
 </script>
-
-<!-- Diálogo salir -->
-<div id="exitDialog" style="display:none;position:fixed;inset:0;z-index:999;background:rgba(0,0,0,0.65);align-items:center;justify-content:center;">
-  <div style="background:#1a5c3a;border:1px solid rgba(200,168,75,0.4);border-radius:20px;padding:28px 24px;width:80%;max-width:300px;text-align:center;font-family:'Outfit',sans-serif;">
-    <div style="font-size:32px;margin-bottom:12px">🕊️</div>
-    <p style="font-size:16px;font-weight:500;color:#f7f9f5;margin-bottom:8px">¿Deseas salir?</p>
-    <p style="font-size:13px;color:rgba(247,249,245,0.6);margin-bottom:22px;line-height:1.5">¡Que Dios te bendiga!</p>
-    <div style="display:flex;gap:10px;">
-      <button onclick="hideExitDialog()" style="flex:1;padding:11px;border-radius:12px;border:1px solid rgba(200,168,75,0.4);background:transparent;color:#e8c96a;font-size:14px;font-weight:500;cursor:pointer;">Cancelar</button>
-      <button onclick="confirmExit()" style="flex:1;padding:11px;border-radius:12px;border:none;background:#c8a84b;color:#0b3520;font-size:14px;font-weight:600;cursor:pointer;">Salir</button>
-    </div>
-  </div>
-</div>
 </body>
 </html>
