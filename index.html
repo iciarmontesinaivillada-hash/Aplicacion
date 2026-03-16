@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#0b3520" />
+  <meta name="description" content="Iglesia Cristiana Monte Sinaí II – Villada" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="ICIAR Villada" />
+  <title>ICIAR Villada</title>
+  <link rel="manifest" href="manifest.json" />
+  <link rel="apple-touch-icon" href="icon-192.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --g-deep:  #0b3520;
+      --g-mid:   #1a5c3a;
+      --g-light: #2e8a57;
+      --g-mist:  #4aaf7a;
+      --gold:    #c8a84b;
+      --gold-l:  #e8c96a;
+      --gold-d:  rgba(200,168,75,0.30);
+      --white:   #f7f9f5;
+      --dim:     rgba(247,249,245,0.50);
+      --r:       16px;
+    }
+    html, body { height: 100%; }
+    body {
+      font-family: 'Outfit', sans-serif;
+      background: var(--g-deep);
+      color: var(--white);
+      min-height: 100dvh;
+      display: flex; flex-direction: column; align-items: center;
+      overflow-x: hidden;
+    }
+    /* BG */
+    .bg { position:fixed; inset:0; pointer-events:none; z-index:0; }
+    .bg::before {
+      content:''; position:absolute;
+      width:480px; height:480px; border-radius:50%;
+      background: radial-gradient(circle, rgba(46,138,87,0.20) 0%, transparent 65%);
+      top:-100px; left:-80px; animation: drift 22s ease-in-out infinite alternate;
+    }
+    .bg::after {
+      content:''; position:absolute;
+      width:360px; height:360px; border-radius:50%;
+      background: radial-gradient(circle, rgba(74,175,122,0.13) 0%, transparent 65%);
+      bottom:-60px; right:-60px; animation: drift 28s ease-in-out infinite alternate-reverse;
+    }
+    @keyframes drift { from{transform:translate(0,0) scale(1)} to{transform:translate(30px,25px) scale(1.08)} }
+    .top-bar { position:fixed; top:0; left:0; right:0; height:3px; z-index:100;
+      background: linear-gradient(90deg, transparent, var(--gold), var(--gold-l), var(--gold), transparent); }
+    /* APP */
+    .app {
+      position:relative; z-index:1;
+      width:100%; max-width:430px; min-height:100dvh;
+      display:flex; flex-direction:column; align-items:center;
+      padding: 0 18px calc(28px + env(safe-area-inset-bottom,0px));
+    }
+    /* HEADER */
+    .header {
+      width:100%; display:flex; flex-direction:column; align-items:center;
+      padding-top: calc(38px + env(safe-area-inset-top,0px));
+      margin-bottom: 22px;
+    }
+    .logo-ring {
+      width:108px; height:108px; border-radius:50%;
+      border:2px solid var(--gold); padding:4px; margin-bottom:16px;
+      animation: pulse 4s ease-in-out infinite;
+    }
+    .logo-ring img { width:100%; height:100%; border-radius:50%; object-fit:cover; display:block; }
+    .logo-fallback {
+      width:100%; height:100%; border-radius:50%;
+      background:var(--g-mid); display:flex; align-items:center;
+      justify-content:center; font-size:38px; display:none;
+    }
+    @keyframes pulse {
+      0%,100%{box-shadow:0 0 0 0 rgba(200,168,75,0.25),0 0 40px rgba(26,92,58,0.35)}
+      50%{box-shadow:0 0 0 9px rgba(200,168,75,0),0 0 60px rgba(26,92,58,0.55)}
+    }
+    .app-name {
+      font-family:'Cormorant Garamond',serif; font-size:36px; font-weight:700;
+      letter-spacing:2px; text-align:center; line-height:1;
+    }
+    .app-sub {
+      font-size:10px; font-weight:500; letter-spacing:4px; text-transform:uppercase;
+      color:var(--gold); margin-top:6px; text-align:center;
+    }
+    .h-line { width:50px; height:1px; background:linear-gradient(90deg,transparent,var(--gold),transparent); margin-top:14px; }
+    .live-badge {
+      display:none; align-items:center; gap:6px;
+      background:rgba(220,50,50,0.15); border:1px solid rgba(220,50,50,0.45);
+      border-radius:20px; padding:5px 14px;
+      font-size:11px; font-weight:600; letter-spacing:1.5px; text-transform:uppercase;
+      color:#ff7070; margin-top:12px;
+    }
+    .live-badge.show { display:flex; }
+    .live-dot { width:6px; height:6px; border-radius:50%; background:#ff4444; animation:blink 1.2s ease-in-out infinite; }
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.15} }
+    /* SCREENS */
+    .screen { display:none; width:100%; flex-direction:column; gap:13px; }
+    .screen.active { display:flex; animation:fadeUp 0.35s ease both; }
+    @keyframes fadeUp { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:translateY(0)} }
+    /* GRID */
+    .grid2 { display:grid; grid-template-columns:1fr 1fr; gap:13px; }
+    .span2 { grid-column:1/-1; }
+    /* CARD BTN */
+    .cb {
+      background:rgba(255,255,255,0.05); border:1px solid var(--gold-d);
+      border-radius:var(--r); padding:20px 12px 16px;
+      display:flex; flex-direction:column; align-items:center; gap:9px;
+      cursor:pointer; text-decoration:none; color:var(--white);
+      transition:transform .18s ease, background .18s, border-color .18s;
+      backdrop-filter:blur(6px); -webkit-backdrop-filter:blur(6px);
+    }
+    .cb:active { transform:scale(0.96); background:rgba(255,255,255,0.09); border-color:var(--gold); }
+    .cb.clive { border-color:rgba(220,50,50,0.45); background:rgba(220,50,50,0.07); }
+    .cb.clive:active { border-color:rgba(220,50,50,0.8); }
+    .ci { font-size:30px; line-height:1; }
+    .cl { font-size:11px; font-weight:500; letter-spacing:1.5px; text-transform:uppercase; text-align:center; color:rgba(247,249,245,0.85); }
+    .cl.gold { color:var(--gold-l); }
+    .cl.red  { color:#ff9494; }
+    /* LOADING */
+    .spin-wrap { width:100%; padding:28px; display:flex; flex-direction:column; align-items:center; gap:10px; }
+    .spinner { width:26px; height:26px; border:2px solid rgba(200,168,75,0.18); border-top-color:var(--gold); border-radius:50%; animation:spin .8s linear infinite; }
+    @keyframes spin { to{transform:rotate(360deg)} }
+    .spin-txt { font-size:13px; color:var(--dim); }
+    /* SECTION HEADER */
+    .sh { display:flex; flex-direction:column; align-items:center; margin-bottom:2px; }
+    .sh h2 { font-family:'Cormorant Garamond',serif; font-size:26px; font-weight:600; text-align:center; }
+    .sh-line { width:36px; height:1px; background:linear-gradient(90deg,transparent,var(--gold),transparent); margin-top:6px; }
+    /* BACK */
+    .back {
+      background:none; border:none; color:var(--gold);
+      font-family:'Outfit',sans-serif; font-size:12px; font-weight:500;
+      letter-spacing:2px; text-transform:uppercase;
+      cursor:pointer; padding:6px 0;
+      display:flex; align-items:center; gap:5px;
+      align-self:flex-start; opacity:.8; transition:opacity .2s;
+    }
+    .back:hover { opacity:1; }
+    /* SOCIAL */
+    .soc {
+      display:flex; align-items:center; gap:14px;
+      background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.09);
+      border-radius:14px; padding:15px 18px;
+      cursor:pointer; text-decoration:none; color:var(--white);
+      transition:all .2s ease;
+    }
+    .soc:active { background:rgba(255,255,255,0.09); border-color:var(--gold-d); transform:translateX(4px); }
+    .si { width:40px; height:40px; border-radius:11px; display:flex; align-items:center; justify-content:center; font-size:19px; flex-shrink:0; }
+    .si-fb{background:#1877f2} .si-yt{background:#ff0000} .si-ig{background:linear-gradient(135deg,#833ab4,#fd1d1d,#fcb045)} .si-tt{background:#111;border:1px solid #333}
+    .sn { font-size:14px; font-weight:500; } .sh2 { font-size:11px; color:var(--dim); margin-top:2px; }
+    .sa { color:var(--gold); opacity:.6; font-size:14px; }
+    /* ANUNCIOS */
+    .ac { background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.09); border-radius:14px; padding:16px 18px; }
+    .ac-fecha { font-size:10px; font-weight:500; letter-spacing:2px; text-transform:uppercase; color:var(--gold); margin-bottom:6px; }
+    .ac-titulo { font-size:15px; font-weight:500; margin-bottom:5px; }
+    .ac-desc { font-size:13px; color:rgba(247,249,245,0.70); line-height:1.65; }
+    /* LIVE */
+    .live-frame-wrap {
+      width:100%; aspect-ratio:16/9; border-radius:14px; overflow:hidden;
+      border:1px solid rgba(220,50,50,0.28); background:#000; position:relative;
+    }
+    .live-frame-wrap iframe { width:100%; height:100%; border:none; display:block; }
+    .live-ph { width:100%; height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:10px; padding:20px; text-align:center; }
+    .live-ph span { font-size:42px; }
+    .live-ph p { font-size:14px; color:var(--dim); line-height:1.65; }
+    /* BIBLIA */
+    .bw { background:rgba(255,255,255,0.04); border:1px solid var(--gold-d); border-radius:var(--r); overflow:hidden; }
+    .bc { display:flex; gap:8px; padding:12px; border-bottom:1px solid rgba(255,255,255,0.07); flex-wrap:wrap; }
+    .bsel {
+      flex:1; min-width:100px; background:rgba(255,255,255,0.07);
+      border:1px solid rgba(255,255,255,0.13); border-radius:10px;
+      color:var(--white); font-family:'Outfit',sans-serif; font-size:13px;
+      padding:9px 11px; cursor:pointer; -webkit-appearance:none; appearance:none;
+    }
+    .bsel option { background:#0b3520; color:#f7f9f5; }
+    .bgo { background:var(--gold); border:none; border-radius:10px; color:var(--g-deep); font-family:'Outfit',sans-serif; font-size:13px; font-weight:600; padding:9px 16px; cursor:pointer; transition:transform .15s; white-space:nowrap; }
+    .bgo:active { transform:scale(0.96); }
+    .bt { padding:16px 18px; max-height:48vh; overflow-y:auto; }
+    .bref { font-family:'Cormorant Garamond',serif; font-size:19px; font-weight:600; color:var(--gold); margin-bottom:12px; }
+    .verse { font-size:14px; line-height:1.9; color:rgba(247,249,245,0.87); margin-bottom:4px; }
+    .verse sup { font-size:9px; color:var(--gold); margin-right:3px; vertical-align:super; }
+    .bhint { font-size:13px; color:var(--dim); text-align:center; padding:28px 0; }
+    /* SCROLLBAR */
+    ::-webkit-scrollbar{width:3px} ::-webkit-scrollbar-track{background:transparent} ::-webkit-scrollbar-thumb{background:rgba(200,168,75,0.3);border-radius:2px}
+    /* UPDATE TOAST */
+    .update-bar {
+      display:none; position:fixed; bottom:20px; left:50%; transform:translateX(-50%);
+      background:var(--g-mid); border:1px solid var(--gold-d); border-radius:30px;
+      padding:10px 20px; font-size:12px; color:var(--gold-l); z-index:200;
+      cursor:pointer; white-space:nowrap; box-shadow:0 4px 22px rgba(0,0,0,0.45);
+    }
+    .update-bar.show { display:block; }
+  </style>
+</head>
+<body>
+<div class="bg"></div>
+<div class="top-bar"></div>
+
+<div class="app">
+  <!-- HEADER -->
+  <header class="header">
+    <div class="logo-ring">
+      <img src="icon-512.png" alt="Logo" onerror="this.style.display='none';document.querySelector('.logo-fallback').style.display='flex'" />
+      <div class="logo-fallback">🕊️</div>
+    </div>
+    <h1 class="app-name">ICIAR Villada</h1>
+    <p class="app-sub">Monte Sinaí II</p>
+    <div class="h-line"></div>
+    <div class="live-badge" id="liveBadge"><div class="live-dot"></div>En vivo ahora</div>
+  </header>
+
+  <!-- ══ HOME ══ -->
+  <div class="screen active" id="s-home">
+    <div id="homeLoad" class="spin-wrap">
+      <div class="spinner"></div>
+      <p class="spin-txt">Cargando contenido…</p>
+    </div>
+    <div id="homeContent" style="display:none;width:100%">
+      <div class="grid2">
+        <button class="cb clive span2" id="btnLive" onclick="gotoLive()">
+          <span class="ci">📺</span>
+          <span class="cl red" id="lblLive">Culto en Vivo</span>
+        </button>
+        <button class="cb" onclick="openLink('https://msvillada.church/')">
+          <span class="ci">🌐</span><span class="cl gold">Página Web</span>
+        </button>
+        <button class="cb" onclick="show('s-redes')">
+          <span class="ci">📲</span><span class="cl">Redes Sociales</span>
+        </button>
+        <button class="cb" onclick="show('s-anuncios')">
+          <span class="ci">📢</span><span class="cl">Anuncios</span>
+        </button>
+        <button class="cb" onclick="show('s-biblia')">
+          <span class="ci">📖</span><span class="cl">Biblia RV1960</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ LIVE ══ -->
+  <div class="screen" id="s-live">
+    <button class="back" onclick="show('s-home')">← Inicio</button>
+    <div class="sh"><h2>Culto en Vivo</h2><div class="sh-line"></div></div>
+    <div class="live-frame-wrap">
+      <div class="live-ph" id="livePH">
+        <span>🕊️</span>
+        <p id="liveMsg">Verificando transmisión…</p>
+      </div>
+      <iframe id="liveIframe" style="display:none"
+        allow="accelerometer;autoplay;clipboard-write;encrypted-media;gyroscope;picture-in-picture"
+        allowfullscreen></iframe>
+    </div>
+    <p style="font-size:12px;color:var(--dim);text-align:center;line-height:1.65">
+      El enlace de transmisión se actualiza automáticamente<br>antes de cada culto. ¡Bendiciones!
+    </p>
+  </div>
+
+  <!-- ══ REDES ══ -->
+  <div class="screen" id="s-redes">
+    <button class="back" onclick="show('s-home')">← Inicio</button>
+    <div class="sh"><h2>Redes Sociales</h2><div class="sh-line"></div></div>
+    <a class="soc" onclick="openLink('https://www.facebook.com/people/Iglesia-MONTE-SINA%C3%8D-II/100067557746637/')">
+      <div class="si si-fb">📘</div>
+      <div style="flex:1"><div class="sn">Facebook</div><div class="sh2">Iglesia Monte Sinaí II</div></div>
+      <span class="sa">›</span>
+    </a>
+    <a class="soc" onclick="openLink('https://www.youtube.com/@montesinai-th3xu')">
+      <div class="si si-yt">▶️</div>
+      <div style="flex:1"><div class="sn">YouTube</div><div class="sh2">@montesinai-th3xu</div></div>
+      <span class="sa">›</span>
+    </a>
+    <a class="soc" onclick="openLink('https://www.instagram.com/montesinaiiivillada')">
+      <div class="si si-ig">📸</div>
+      <div style="flex:1"><div class="sn">Instagram</div><div class="sh2">@montesinaiiivillada</div></div>
+      <span class="sa">›</span>
+    </a>
+    <a class="soc" onclick="openLink('https://www.tiktok.com/@sina.ii6')">
+      <div class="si si-tt">🎵</div>
+      <div style="flex:1"><div class="sn">TikTok</div><div class="sh2">@sina.ii6</div></div>
+      <span class="sa">›</span>
+    </a>
+  </div>
+
+  <!-- ══ ANUNCIOS ══ -->
+  <div class="screen" id="s-anuncios">
+    <button class="back" onclick="show('s-home')">← Inicio</button>
+    <div class="sh"><h2>Anuncios</h2><div class="sh-line"></div></div>
+    <div id="anunciosCont">
+      <div class="spin-wrap"><div class="spinner"></div><p class="spin-txt">Cargando…</p></div>
+    </div>
+  </div>
+
+  <!-- ══ BIBLIA ══ -->
+  <div class="screen" id="s-biblia">
+    <button class="back" onclick="show('s-home')">← Inicio</button>
+    <div class="sh"><h2>Biblia RV1960</h2><div class="sh-line"></div></div>
+    <div class="bw">
+      <div class="bc">
+        <select class="bsel" id="bookSel" onchange="fillCaps()"></select>
+        <select class="bsel" id="capSel" style="max-width:80px"></select>
+        <button class="bgo" onclick="loadVerse()">Leer</button>
+      </div>
+      <div class="bt" id="bibleText">
+        <p class="bhint">Selecciona un libro y capítulo para leer la Palabra.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="update-bar" id="updateBar" onclick="location.reload()">🔄 Hay nuevo contenido – toca para actualizar</div>
+
+<script>
+// ════════════════════════════════════════════════════════
+//  ★ CONFIGURACIÓN — edita estos valores con tu Sheet
+// ════════════════════════════════════════════════════════
+const CFG = {
+  sheetId:  'TU_SHEET_ID_AQUI',      // ← ID del Google Sheet
+  apiKey:   'TU_API_KEY_AQUI',       // ← API Key de Google
+  tab:      'Config'                  // ← nombre de la pestaña
+};
+
+// ════════════════════════════════════════════════════════
+//  DATOS DE DEMOSTRACIÓN (activos hasta configurar Sheet)
+// ════════════════════════════════════════════════════════
+const DEMO = {
+  liveUrl:   '',            // pega aquí un link de YouTube para probar
+  liveLabel: 'Culto en Vivo',
+  anuncios: [
+    { fecha:'Domingo 16 Mar', titulo:'¡Culto de adoración!',   desc:'Este domingo a las 11:00 AM. Ven con tu familia. ¡Te esperamos!' },
+    { fecha:'Miércoles 19 Mar', titulo:'Estudio Bíblico',      desc:'A las 7:00 PM. Trae tu Biblia.' },
+    { fecha:'Próximamente',    titulo:'Retiro de Jóvenes',      desc:'Más información en las próximas semanas.' }
+  ]
+};
+
+// ════════════════════════════════════════════════════════
+let DATA = null;
+let anunciosReady = false;
+let bibleReady = false;
+
+// Navegación
+function show(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo({ top:0, behavior:'smooth' });
+  if (id === 's-anuncios' && !anunciosReady) renderAnuncios();
+  if (id === 's-biblia'   && !bibleReady)    initBible();
+  if (id === 's-live')                       loadLive();
+}
+
+function openLink(u) { window.open(u, '_blank', 'noopener,noreferrer'); }
+
+function gotoLive() { show('s-live'); }
+
+// ── Carga Sheet o demo ────────────────────────────────
+async function boot() {
+  if (CFG.sheetId === 'TU_SHEET_ID_AQUI') { DATA = DEMO; revealHome(); return; }
+  try {
+    const url = `https://sheets.googleapis.com/v4/spreadsheets/${CFG.sheetId}/values/${CFG.tab}?key=${CFG.apiKey}`;
+    const r = await fetch(url);
+    const j = await r.json();
+    const map = {};
+    (j.values || []).forEach(row => { if (row[0]) map[row[0].trim()] = row[1] || ''; });
+    const anuncios = [];
+    for (let i = 1; i <= 6; i++) {
+      if (map[`anuncio_titulo_${i}`]) anuncios.push({
+        fecha:  map[`anuncio_fecha_${i}`]  || '',
+        titulo: map[`anuncio_titulo_${i}`],
+        desc:   map[`anuncio_desc_${i}`]   || ''
+      });
+    }
+    DATA = { liveUrl: map['live_url'] || '', liveLabel: map['live_label'] || 'Culto en Vivo', anuncios };
+    revealHome();
+  } catch(e) { DATA = DEMO; revealHome(); }
+}
+
+function revealHome() {
+  document.getElementById('homeLoad').style.display = 'none';
+  document.getElementById('homeContent').style.display = 'block';
+  const isLive = DATA.liveUrl && DATA.liveUrl.trim();
+  document.getElementById('liveBadge').classList.toggle('show', !!isLive);
+  document.getElementById('lblLive').textContent = DATA.liveLabel;
+  if (isLive) document.getElementById('btnLive').style.borderColor = 'rgba(220,50,50,0.65)';
+}
+
+// ── Culto en vivo ─────────────────────────────────────
+function loadLive() {
+  const url = DATA?.liveUrl || '';
+  const iframe = document.getElementById('liveIframe');
+  const ph     = document.getElementById('livePH');
+  const msg    = document.getElementById('liveMsg');
+  if (!url) {
+    ph.style.display = 'flex'; iframe.style.display = 'none';
+    msg.textContent = 'No hay transmisión activa. ¡Vuelve pronto para el próximo culto!';
+    return;
+  }
+  // Convertir a embed de YouTube
+  let embed = url;
+  const m = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/live\/)([^&?/]+)/);
+  if (m) embed = `https://www.youtube.com/embed/${m[1]}?autoplay=1&rel=0`;
+  ph.style.display = 'none'; iframe.style.display = 'block';
+  if (iframe.src !== embed) iframe.src = embed;
+}
+
+// ── Anuncios ──────────────────────────────────────────
+function renderAnuncios() {
+  anunciosReady = true;
+  const c = document.getElementById('anunciosCont');
+  const lista = DATA?.anuncios || [];
+  if (!lista.length) { c.innerHTML = '<p class="bhint">Sin anuncios por ahora.</p>'; return; }
+  c.innerHTML = lista.map(a => `
+    <div class="ac" style="margin-bottom:12px">
+      ${a.fecha  ? `<div class="ac-fecha">${a.fecha}</div>` : ''}
+      <div class="ac-titulo">${a.titulo}</div>
+      ${a.desc ? `<div class="ac-desc">${a.desc}</div>` : ''}
+    </div>`).join('');
+}
+
+// ── Biblia ────────────────────────────────────────────
+const LIBROS = [
+  ['Génesis','GEN'],['Éxodo','EXO'],['Levítico','LEV'],['Números','NUM'],['Deuteronomio','DEU'],
+  ['Josué','JOS'],['Jueces','JDG'],['Rut','RUT'],['1 Samuel','1SA'],['2 Samuel','2SA'],
+  ['1 Reyes','1KI'],['2 Reyes','2KI'],['1 Crónicas','1CH'],['2 Crónicas','2CH'],['Esdras','EZR'],
+  ['Nehemías','NEH'],['Ester','EST'],['Job','JOB'],['Salmos','PSA'],['Proverbios','PRO'],
+  ['Eclesiastés','ECC'],['Cantares','SNG'],['Isaías','ISA'],['Jeremías','JER'],['Lamentaciones','LAM'],
+  ['Ezequiel','EZK'],['Daniel','DAN'],['Oseas','HOS'],['Joel','JOL'],['Amós','AMO'],
+  ['Abdías','OBA'],['Jonás','JON'],['Miqueas','MIC'],['Nahúm','NAH'],['Habacuc','HAB'],
+  ['Sofonías','ZEP'],['Hageo','HAG'],['Zacarías','ZEC'],['Malaquías','MAL'],
+  ['Mateo','MAT'],['Marcos','MRK'],['Lucas','LUK'],['Juan','JHN'],['Hechos','ACT'],
+  ['Romanos','ROM'],['1 Corintios','1CO'],['2 Corintios','2CO'],['Gálatas','GAL'],['Efesios','EPH'],
+  ['Filipenses','PHP'],['Colosenses','COL'],['1 Tesalonicenses','1TH'],['2 Tesalonicenses','2TH'],
+  ['1 Timoteo','1TI'],['2 Timoteo','2TI'],['Tito','TIT'],['Filemón','PHM'],['Hebreos','HEB'],
+  ['Santiago','JAS'],['1 Pedro','1PE'],['2 Pedro','2PE'],['1 Juan','1JN'],['2 Juan','2JN'],
+  ['3 Juan','3JN'],['Judas','JUD'],['Apocalipsis','REV']
+];
+const CAPS = {
+  GEN:50,EXO:40,LEV:27,NUM:36,DEU:34,JOS:24,JDG:21,RUT:4,'1SA':31,'2SA':24,
+  '1KI':22,'2KI':25,'1CH':29,'2CH':36,EZR:10,NEH:13,EST:10,JOB:42,PSA:150,
+  PRO:31,ECC:12,SNG:8,ISA:66,JER:52,LAM:5,EZK:48,DAN:12,HOS:14,JOL:3,AMO:9,
+  OBA:1,JON:4,MIC:7,NAH:3,HAB:3,ZEP:3,HAG:2,ZEC:14,MAL:4,MAT:28,MRK:16,
+  LUK:24,JHN:21,ACT:28,ROM:16,'1CO':16,'2CO':13,GAL:6,EPH:6,PHP:4,COL:4,
+  '1TH':5,'2TH':3,'1TI':6,'2TI':4,TIT:3,PHM:1,HEB:13,JAS:5,'1PE':5,'2PE':3,
+  '1JN':5,'2JN':1,'3JN':1,JUD:1,REV:22
+};
+
+function initBible() {
+  bibleReady = true;
+  const sel = document.getElementById('bookSel');
+  LIBROS.forEach(([name,code]) => {
+    const o = document.createElement('option');
+    o.value = code; o.textContent = name; sel.appendChild(o);
+  });
+  fillCaps();
+}
+
+function fillCaps() {
+  const code = document.getElementById('bookSel').value;
+  const sel  = document.getElementById('capSel');
+  sel.innerHTML = '';
+  for (let i = 1; i <= (CAPS[code]||1); i++) {
+    const o = document.createElement('option'); o.value = i; o.textContent = i; sel.appendChild(o);
+  }
+}
+
+async function loadVerse() {
+  const code = document.getElementById('bookSel').value;
+  const cap  = document.getElementById('capSel').value;
+  const name = LIBROS.find(([,c]) => c === code)?.[0] || code;
+  const div  = document.getElementById('bibleText');
+  div.innerHTML = '<div class="spin-wrap"><div class="spinner"></div><p class="spin-txt">Cargando…</p></div>';
+  try {
+    const res = await fetch(`https://bible-api.com/${code}+${cap}?translation=rv1960`);
+    if (!res.ok) throw 0;
+    const d = await res.json();
+    div.innerHTML = `<div class="bref">${name} ${cap}</div>` +
+      (d.verses||[]).map(v => `<p class="verse"><sup>${v.verse}</sup>${v.text.trim()}</p>`).join('');
+  } catch {
+    div.innerHTML = `<div class="bref">${name} ${cap}</div>
+      <p class="verse"><sup>1</sup>Porque de tal manera amó Dios al mundo, que ha dado a su Hijo unigénito, para que todo aquel que en él cree, no se pierda, mas tenga vida eterna. (Juan 3:16)</p>
+      <p class="bhint" style="margin-top:14px">⚠️ Se requiere internet para cargar los capítulos.</p>`;
+  }
+}
+
+// ── Service Worker ────────────────────────────────────
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js').then(reg => {
+    reg.addEventListener('updatefound', () => {
+      reg.installing.addEventListener('statechange', function() {
+        if (this.state === 'installed' && navigator.serviceWorker.controller)
+          document.getElementById('updateBar').classList.add('show');
+      });
+    });
+  });
+}
+
+boot();
+</script>
+</body>
+</html>
