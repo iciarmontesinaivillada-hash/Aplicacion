@@ -191,9 +191,10 @@
         <button class="cb" onclick="show('s-anuncios')">
           <span class="ci">📢</span><span class="cl">Anuncios</span>
         </button>
-        <button class="cb" onclick="show('s-biblia')">
-          <span class="ci">📖</span><span class="cl">Biblia RV1960</span>
+        <button class="cb span2" id="btnZoom" onclick="abrirZoom()">
+          <span class="ci">📹</span><span class="cl" style="color:#4a90d9">Reunión Zoom</span>
         </button>
+
       </div>
     </div>
   </div>
@@ -250,16 +251,6 @@
     </div>
   </div>
 
-  <!-- BIBLIA -->
-  <div class="screen" id="s-biblia">
-    <button class="back" onclick="show('s-home')">← Inicio</button>
-    <div class="sh"><h2>Biblia RV1960</h2><div class="sh-line"></div></div>
-    <div class="bw">
-      <div class="bc">
-        <select class="bsel" id="bookSel" onchange="fillCaps()"></select>
-        <select class="bsel" id="capSel" style="max-width:80px"></select>
-        <button class="bgo" onclick="loadVerse()">Leer</button>
-      </div>
       <div class="bt" id="bibleText">
         <p class="bhint">Selecciona un libro y capítulo para leer la Palabra.</p>
       </div>
@@ -323,7 +314,6 @@ function show(id) {
     history.pushState({ screen: id }, '');
   }
   if (id === 's-anuncios' && !anunciosReady) renderAnuncios();
-  if (id === 's-biblia'   && !bibleReady)    initBible();
   if (id === 's-live')                       loadLive();
 }
 
@@ -364,6 +354,34 @@ function openLink(u) {
   window.open(u, '_blank', 'noopener,noreferrer');
 }
 
+function abrirZoom() {
+  var zoomUrl = (DATA && DATA.zoomUrl) ? DATA.zoomUrl.trim() : '';
+  if (!zoomUrl) {
+    alert('No hay reunión de Zoom programada por el momento.');
+    return;
+  }
+  // Extraer meeting ID y password del link de Zoom
+  var mMatch = zoomUrl.match(/\/j\/(\d+)/);
+  var pMatch = zoomUrl.match(/[?&]pwd=([^&]+)/);
+  if (mMatch) {
+    var meetingId = mMatch[1];
+    var pwd = pMatch ? pMatch[1] : '';
+    // Abrir app nativa de Zoom
+    var zoomApp = 'zoomus://zoom.us/join?confno=' + meetingId + (pwd ? '&pwd=' + pwd : '');
+    window.location.href = zoomApp;
+    // Fallback al navegador si no tiene Zoom instalado
+    setTimeout(function() {
+      window.open(zoomUrl, '_blank', 'noopener,noreferrer');
+    }, 1500);
+  } else {
+    window.open(zoomUrl, '_blank', 'noopener,noreferrer');
+  }
+}
+
+function abrirYoutubeFinal(url) {
+  window.open(url, '_blank', 'noopener,noreferrer');
+}
+
 // ══════════════════════════════════════════
 //  CARGA GOOGLE SHEET
 // ══════════════════════════════════════════
@@ -389,6 +407,8 @@ async function boot() {
     DATA = {
       liveUrl:   map['live_url']   || '',
       liveLabel: map['live_label'] || 'Culto en Vivo',
+      zoomUrl:   map['zoom_url']   || '',
+      zoomLabel: map['zoom_label'] || 'Reunión Zoom',
       anuncios:  anuncios
     };
   } catch(e) {
@@ -405,6 +425,14 @@ function revealHome() {
   document.getElementById('lblLive').textContent = DATA.liveLabel;
   if (isLive) document.getElementById('btnLive').style.borderColor = 'rgba(220,50,50,0.65)';
   liveUrl = DATA.liveUrl || '';
+  // Zoom
+  var hasZoom = DATA.zoomUrl && DATA.zoomUrl.trim() !== '';
+  var btnZoom = document.getElementById('btnZoom');
+  if (btnZoom) {
+    btnZoom.style.borderColor = hasZoom ? 'rgba(74,144,217,0.6)' : 'rgba(200,168,75,0.30)';
+    var zLabel = btnZoom.querySelector('.cl');
+    if (zLabel) zLabel.textContent = DATA.zoomLabel || 'Reunión Zoom';
+  }
 }
 
 // ══════════════════════════════════════════
