@@ -322,8 +322,8 @@
 //  ★ CONFIGURACIÓN — edita estos valores con tu Sheet
 // ════════════════════════════════════════════════════════
 const CFG = {
-  sheetId:  'TU_SHEET_ID_AQUI',      // ← ID del Google Sheet
-  apiKey:   'TU_API_KEY_AQUI',       // ← API Key de Google
+  sheetId:  '1JlGUE5NznkZHPw2Sp5JRod6PAgKlhb01zKzsOI_D3iA',      // ← ID del Google Sheet
+  apiKey:   'AIzaSyBrv-qabRQp58diCQaO96fvShts0U4ST_E',       // ← API Key de Google
   tab:      'Config'                  // ← nombre de la pestaña
 };
 
@@ -361,7 +361,7 @@ function gotoLive() { show('s-live'); }
 
 // ── Carga Sheet o demo ────────────────────────────────
 async function boot() {
-  if (CFG.sheetId === 'TU_SHEET_ID_AQUI') { DATA = DEMO; revealHome(); return; }
+  if (CFG.sheetId === '1JlGUE5NznkZHPw2Sp5JRod6PAgKlhb01zKzsOI_D3iA') { DATA = DEMO; revealHome(); return; }
   try {
     const url = `https://sheets.googleapis.com/v4/spreadsheets/${CFG.sheetId}/values/${CFG.tab}?key=${CFG.apiKey}`;
     const r = await fetch(url);
