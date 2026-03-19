@@ -194,6 +194,9 @@
         <button class="cb span2" id="btnZoom" onclick="abrirZoom()">
           <span class="ci">📹</span><span class="cl" style="color:#4a90d9">Reunión Zoom</span>
         </button>
+        <button class="cb span2" onclick="show('s-rol')">
+          <span class="ci">📅</span><span class="cl gold">Rol Mensual</span>
+        </button>
 
       </div>
     </div>
@@ -258,6 +261,18 @@
   </div>
 </div>
 
+  <!-- ROL MENSUAL -->
+  <div class="screen" id="s-rol">
+    <button class="back" onclick="show('s-home')">← Inicio</button>
+    <div class="sh"><h2 id="rolTitulo">Rol Mensual</h2><div class="sh-line"></div></div>
+    <div id="rolContainer" style="width:100%;border-radius:14px;overflow:hidden;background:rgba(255,255,255,0.04);border:1px solid rgba(200,168,75,0.3);">
+      <div class="spin-wrap"><div class="spinner"></div><p class="spin-txt">Cargando rol…</p></div>
+    </div>
+    <p style="font-size:12px;color:var(--dim);text-align:center;line-height:1.65">
+      El rol se actualiza automáticamente cada mes.
+    </p>
+  </div>
+
 <!-- UPDATE BAR -->
 <div class="update-bar" id="updateBar" onclick="location.reload()">🔄 Hay nuevo contenido – toca para actualizar</div>
 
@@ -287,6 +302,7 @@ const CFG = {
 const DEMO = {
   liveUrl: '',
   liveLabel: 'Culto en Vivo',
+  roles: {},
   anuncios: [
     { fecha:'Domingo', titulo:'¡Culto de adoración!', desc:'A las 11:00 AM. ¡Te esperamos!' },
     { fecha:'Miércoles', titulo:'Estudio Bíblico', desc:'7:00 PM. Trae tu Biblia.' }
@@ -314,6 +330,7 @@ function show(id) {
     history.pushState({ screen: id }, '');
   }
   if (id === 's-anuncios' && !anunciosReady) renderAnuncios();
+  if (id === 's-rol') loadRol();
   if (id === 's-live')                       loadLive();
 }
 
@@ -404,11 +421,27 @@ async function boot() {
         });
       }
     }
+    // Leer pestaña Roles por separado
+    var roles = {};
+    try {
+      var urlRoles = 'https://sheets.googleapis.com/v4/spreadsheets/' + CFG.sheetId + '/values/Roles?key=' + CFG.apiKey;
+      var rRoles = await fetch(urlRoles);
+      if (rRoles.ok) {
+        var jRoles = await rRoles.json();
+        (jRoles.values || []).forEach(function(row) { if (row[0]) roles[row[0].trim()] = row[1] || ''; });
+      }
+    } catch(e2) {}
+    // Convertir claves rol_mes_1..12 a índice numérico
+    var rolesMap = {};
+    for (var rm = 1; rm <= 12; rm++) {
+      rolesMap[rm] = roles['rol_mes_' + rm] || '';
+    }
     DATA = {
       liveUrl:   map['live_url']   || '',
       liveLabel: map['live_label'] || 'Culto en Vivo',
       zoomUrl:   map['zoom_url']   || '',
       zoomLabel: map['zoom_label'] || 'Reunión Zoom',
+      roles:     rolesMap,
       anuncios:  anuncios
     };
   } catch(e) {
@@ -474,6 +507,21 @@ function abrirYoutube() {
 // ══════════════════════════════════════════
 //  ANUNCIOS
 // ══════════════════════════════════════════
+function loadRol() {
+  var meses = ['Enero','Febrero','Marzo','Abril','Mayo','Junio',
+               'Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+  var mesActual = new Date().getMonth() + 1; // 1-12
+  var nombreMes = meses[mesActual - 1];
+  document.getElementById('rolTitulo').textContent = 'Rol — ' + nombreMes;
+  var container = document.getElementById('rolContainer');
+  var imgUrl = (DATA && DATA.roles) ? DATA.roles[mesActual] : '';
+  if (!imgUrl) {
+    container.innerHTML = '<p class="bhint">No hay rol disponible para ' + nombreMes + '.</p>';
+    return;
+  }
+  container.innerHTML = '<img src="' + imgUrl + '" alt="Rol ' + nombreMes + '" style="width:100%;display:block;border-radius:14px;" onerror="this.parentElement.innerHTML='<p class=bhint>No se pudo cargar la imagen del rol.</p>'">';
+}
+
 function renderAnuncios() {
   anunciosReady = true;
   var c = document.getElementById('anunciosCont');
