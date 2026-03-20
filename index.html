@@ -263,8 +263,8 @@
       <!-- ROL MENSUAL -->
   <div class="screen" id="s-rol">
     <button class="back" onclick="show('s-home')">← Inicio</button>
-    <div class="sh"><h2>Rol Mensual</h2><div class="sh-line"></div></div>
-    <div id="rolContainer" style="width:100%;border-radius:14px;overflow:hidden;background:rgba(255,255,255,0.04);border:1px solid rgba(200,168,75,0.3);min-height:80px;margin-bottom:14px"></div>
+    <div class="sh" style="margin-bottom:0"><h2>Rol Mensual</h2><div class="sh-line"></div></div>
+    <div id="rolContainer" style="width:100%;border-radius:14px;overflow:hidden;background:rgba(255,255,255,0.04);border:1px solid rgba(200,168,75,0.3);margin-bottom:14px"></div>
     <div id="mesesGrid" style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;width:100%"></div>
   </div>
 
@@ -332,6 +332,9 @@ function show(id) {
   document.querySelectorAll('.screen').forEach(function(s) { s.classList.remove('active'); });
   document.getElementById(id).classList.add('active');
   window.scrollTo({ top:0, behavior:'smooth' });
+  // Ocultar header en pantallas secundarias
+  var header = document.querySelector('.header');
+  if (header) header.style.display = id === 's-home' ? 'flex' : 'none';
   if (navStack[navStack.length-1] !== id) {
     navStack.push(id);
     history.pushState({ screen:id }, '');
@@ -355,6 +358,8 @@ window.addEventListener('popstate', function() {
     document.querySelectorAll('.screen').forEach(function(s) { s.classList.remove('active'); });
     document.getElementById(prev).classList.add('active');
     window.scrollTo({ top:0, behavior:'smooth' });
+    var header = document.querySelector('.header');
+    if (header) header.style.display = prev === 's-home' ? 'flex' : 'none';
     if (prev === 's-live') loadLive();
     history.pushState({ screen:prev }, '');
   } else {
