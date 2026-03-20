@@ -260,16 +260,21 @@
   </div>
 </div>
 
-    <!-- ROL MENSUAL -->
+      <!-- ROL MENSUAL -->
   <div class="screen" id="s-rol">
     <button class="back" onclick="show('s-home')">← Inicio</button>
     <div class="sh"><h2>Rol Mensual</h2><div class="sh-line"></div></div>
-    <div id="mesesGrid" style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;width:100%;margin-bottom:14px"></div>
-    <div id="rolContainer" style="width:100%;border-radius:14px;overflow:hidden;background:rgba(255,255,255,0.04);border:1px solid rgba(200,168,75,0.3);min-height:80px"></div>
+    <div id="rolContainer" style="width:100%;border-radius:14px;overflow:hidden;background:rgba(255,255,255,0.04);border:1px solid rgba(200,168,75,0.3);min-height:80px;margin-bottom:14px"></div>
+    <div id="mesesGrid" style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;width:100%"></div>
   </div>
 
-<!-- UPDATE BAR -->
+  <!-- UPDATE BAR -->
 <div class="update-bar" id="updateBar" onclick="location.reload()">🔄 Hay nuevo contenido – toca para actualizar</div>
+
+<!-- MODAL IMAGEN GRANDE -->
+<div id="imgModal" style="display:none;position:fixed;inset:0;z-index:999;background:rgba(0,0,0,0.92);align-items:center;justify-content:center;padding:20px;" onclick="cerrarModal()">
+  <img id="imgModalSrc" src="" style="max-width:100%;max-height:90vh;border-radius:12px;object-fit:contain;" />
+</div>
 
 <!-- DIÁLOGO SALIR -->
 <div class="exit-overlay" id="exitDialog">
@@ -403,12 +408,42 @@ async function boot() {
         });
       }
     }
+    // Leer pestaña Roles del Sheet
+    var rolesFromSheet = {};
+    try {
+      var urlR = 'https://sheets.googleapis.com/v4/spreadsheets/'
+        + CFG.sheetId + '/values/Roles?key=' + CFG.apiKey;
+      var rR = await fetch(urlR);
+      if (rR.ok) {
+        var jR = await rR.json();
+        var mesesNombres = {'enero':1,'febrero':2,'marzo':3,'abril':4,'mayo':5,'junio':6,
+                            'julio':7,'agosto':8,'septiembre':9,'octubre':10,'noviembre':11,'diciembre':12};
+        (jR.values || []).forEach(function(row) {
+          if (!row[0] || !row[1]) return;
+          var key = row[0].trim().toLowerCase();
+          var val = row[1].trim();
+          // Acepta: rol_mes_1, rol_mes_enero, enero, 1, etc.
+          var numMatch = key.match(/(\d+)$/);
+          if (numMatch) {
+            rolesFromSheet[parseInt(numMatch[1])] = val;
+          } else {
+            var nombre = key.replace('rol_mes_','').replace('rol_','');
+            if (mesesNombres[nombre]) rolesFromSheet[mesesNombres[nombre]] = val;
+          }
+        });
+      }
+    } catch(eR) {}
+    // Combinar: Sheet tiene prioridad, ROLES_IMGS como respaldo
+    var rolesFinales = {};
+    for (var rm = 1; rm <= 12; rm++) {
+      rolesFinales[rm] = rolesFromSheet[rm] || ROLES_IMGS[rm] || '';
+    }
     DATA = {
       liveUrl:   map['live_url']   || '',
       liveLabel: map['live_label'] || 'Culto en Vivo',
       zoomUrl:   map['zoom_url']   || '',
       zoomLabel: map['zoom_label'] || 'Reunión Zoom',
-      roles:     ROLES_IMGS,
+      roles:     rolesFinales,
       anuncios:  anuncios
     };
   } catch(e) { DATA = DEMO; }
@@ -501,9 +536,20 @@ function mostrarRolMes(num) {
   var img = document.createElement('img');
   img.src = imgUrl;
   img.alt = 'Rol ' + meses[num-1];
-  img.style.cssText = 'width:100%;display:block;border-radius:14px;';
+  img.style.cssText = 'width:100%;display:block;border-radius:14px;cursor:zoom-in;';
+  img.onclick = function() { abrirModal(imgUrl); };
   img.onload  = function() { container.innerHTML = ''; container.appendChild(img); };
   img.onerror = function() { container.innerHTML = '<p class="bhint">No se pudo cargar la imagen de ' + meses[num-1] + '.</p>'; };
+}
+
+function abrirModal(src) {
+  document.getElementById('imgModalSrc').src = src;
+  document.getElementById('imgModal').style.display = 'flex';
+}
+
+function cerrarModal() {
+  document.getElementById('imgModal').style.display = 'none';
+  document.getElementById('imgModalSrc').src = '';
 }
 
 // ══════════════════════════════════════════
