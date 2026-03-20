@@ -161,7 +161,7 @@
 <div class="app">
   <header class="header">
     <div class="logo-ring">
-      <img src="icon-512.png" alt="Logo" onerror="this.style.display='none';document.querySelector('.logo-fallback').style.display='flex'" />
+      <img src="https://raw.githubusercontent.com/iciarmontesinaivillada-hash/Aplicacion/main/icon-512.png" alt="Logo ICIAR Villada" onerror="this.style.display='none';document.querySelector('.logo-fallback').style.display='flex'" />
       <div class="logo-fallback">🕊️</div>
     </div>
     <h1 class="app-name">ICIAR Villada</h1>
@@ -191,12 +191,13 @@
         <button class="cb" onclick="show('s-anuncios')">
           <span class="ci">📢</span><span class="cl">Anuncios</span>
         </button>
+        <button class="cb" onclick="show('s-rol')">
+          <span class="ci">📅</span><span class="cl gold">Rol Mensual</span>
+        </button>
         <button class="cb span2" id="btnZoom" onclick="abrirZoom()">
           <span class="ci">📹</span><span class="cl" style="color:#4a90d9">Reunión Zoom</span>
         </button>
-        <button class="cb span2" onclick="show('s-rol')">
-          <span class="ci">📅</span><span class="cl gold">Rol Mensual</span>
-        </button>
+
 
       </div>
     </div>
@@ -254,23 +255,17 @@
     </div>
   </div>
 
-      <div class="bt" id="bibleText">
-        <p class="bhint">Selecciona un libro y capítulo para leer la Palabra.</p>
-      </div>
+
     </div>
   </div>
 </div>
 
-  <!-- ROL MENSUAL -->
+    <!-- ROL MENSUAL -->
   <div class="screen" id="s-rol">
     <button class="back" onclick="show('s-home')">← Inicio</button>
-    <div class="sh"><h2 id="rolTitulo">Rol Mensual</h2><div class="sh-line"></div></div>
-    <div id="rolContainer" style="width:100%;border-radius:14px;overflow:hidden;background:rgba(255,255,255,0.04);border:1px solid rgba(200,168,75,0.3);">
-      <div class="spin-wrap"><div class="spinner"></div><p class="spin-txt">Cargando rol…</p></div>
-    </div>
-    <p style="font-size:12px;color:var(--dim);text-align:center;line-height:1.65">
-      El rol se actualiza automáticamente cada mes.
-    </p>
+    <div class="sh"><h2>Rol Mensual</h2><div class="sh-line"></div></div>
+    <div id="mesesGrid" style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;width:100%;margin-bottom:14px"></div>
+    <div id="rolContainer" style="width:100%;border-radius:14px;overflow:hidden;background:rgba(255,255,255,0.04);border:1px solid rgba(200,168,75,0.3);min-height:80px"></div>
   </div>
 
 <!-- UPDATE BAR -->
@@ -291,7 +286,7 @@
 
 <script>
 // ══════════════════════════════════════════
-//  CONFIGURACIÓN
+//  CONFIGURACIÓN GOOGLE SHEET
 // ══════════════════════════════════════════
 const CFG = {
   sheetId: '1JlGUE5NznkZHPw2Sp5JRod6PAgKlhb01zKzsOI_D3iA',
@@ -299,24 +294,31 @@ const CFG = {
   tab:     'Config'
 };
 
+// Imágenes del rol — actualiza con Imgur cada mes
+const ROLES_IMGS = {
+  1:'', 2:'https://i.imgur.com/XFBDj0A.jpeg',
+  3:'https://i.imgur.com/1bgOFzy.jpeg',
+  4:'', 5:'', 6:'', 7:'', 8:'', 9:'', 10:'', 11:'', 12:''
+};
+
 const DEMO = {
-  liveUrl: '',
-  liveLabel: 'Culto en Vivo',
-  roles: {},
-  anuncios: [
-    { fecha:'Domingo', titulo:'¡Culto de adoración!', desc:'A las 11:00 AM. ¡Te esperamos!' },
-    { fecha:'Miércoles', titulo:'Estudio Bíblico', desc:'7:00 PM. Trae tu Biblia.' }
+  liveUrl:'', liveLabel:'Culto en Vivo',
+  zoomUrl:'', zoomLabel:'Reunión Zoom',
+  roles: ROLES_IMGS,
+  anuncios:[
+    { fecha:'Domingo',   titulo:'Culto de adoración', desc:'A las 11:00 AM. ¡Te esperamos!' },
+    { fecha:'Miércoles', titulo:'Estudio Bíblico',     desc:'7:00 PM. Trae tu Biblia.' }
   ]
 };
 
 // ══════════════════════════════════════════
 //  ESTADO
 // ══════════════════════════════════════════
-let DATA = null;
-let anunciosReady = false;
-let bibleReady = false;
-let navStack = ['s-home'];
-let liveUrl = '';
+var DATA = null;
+var anunciosReady = false;
+var navStack = ['s-home'];
+var mesSeleccionado = new Date().getMonth() + 1;
+var liveUrl = '';
 
 // ══════════════════════════════════════════
 //  NAVEGACIÓN
@@ -324,129 +326,94 @@ let liveUrl = '';
 function show(id) {
   document.querySelectorAll('.screen').forEach(function(s) { s.classList.remove('active'); });
   document.getElementById(id).classList.add('active');
-  window.scrollTo({ top: 0, behavior: 'smooth' });
-  if (navStack[navStack.length - 1] !== id) {
+  window.scrollTo({ top:0, behavior:'smooth' });
+  if (navStack[navStack.length-1] !== id) {
     navStack.push(id);
-    history.pushState({ screen: id }, '');
+    history.pushState({ screen:id }, '');
   }
   if (id === 's-anuncios' && !anunciosReady) renderAnuncios();
-  if (id === 's-rol') loadRol();
-  if (id === 's-live')                       loadLive();
+  if (id === 's-live')    loadLive();
+  if (id === 's-rol')     loadRol();
 }
 
 window.addEventListener('popstate', function() {
   if (navStack.length > 1) {
     navStack.pop();
-    var prev = navStack[navStack.length - 1];
+    var prev = navStack[navStack.length-1];
     document.querySelectorAll('.screen').forEach(function(s) { s.classList.remove('active'); });
     document.getElementById(prev).classList.add('active');
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    window.scrollTo({ top:0, behavior:'smooth' });
     if (prev === 's-live') loadLive();
-    // Re-agregar estado para seguir capturando el back
-    history.pushState({ screen: prev }, '');
+    history.pushState({ screen:prev }, '');
   } else {
-    // Siempre re-agregar estado para que el siguiente back también se capture
-    history.pushState({ screen: 's-home' }, '');
+    history.pushState({ screen:'s-home' }, '');
     document.getElementById('exitDialog').classList.add('show');
   }
 });
 
-function cerrarDialogo() {
-  document.getElementById('exitDialog').classList.remove('show');
-}
+function cerrarDialogo() { document.getElementById('exitDialog').classList.remove('show'); }
 
 function salirApp() {
   document.getElementById('exitDialog').classList.remove('show');
-  // Múltiples intentos para cerrar en Android TWA
   try { history.go(-history.length); } catch(e) {}
-  setTimeout(function() {
-    try { window.close(); } catch(e) {}
-  }, 100);
-  setTimeout(function() {
-    try { window.location.href = 'about:blank'; } catch(e) {}
-  }, 300);
+  setTimeout(function() { try { window.close(); } catch(e) {} }, 100);
+  setTimeout(function() { try { window.location.href='about:blank'; } catch(e) {} }, 300);
 }
 
-function openLink(u) {
-  window.open(u, '_blank', 'noopener,noreferrer');
-}
+function openLink(u) { window.open(u, '_blank', 'noopener,noreferrer'); }
 
 function abrirZoom() {
-  var zoomUrl = (DATA && DATA.zoomUrl) ? DATA.zoomUrl.trim() : '';
-  if (!zoomUrl) {
-    alert('No hay reunión de Zoom programada por el momento.');
-    return;
-  }
-  // Extraer meeting ID y password del link de Zoom
-  var mMatch = zoomUrl.match(/\/j\/(\d+)/);
-  var pMatch = zoomUrl.match(/[?&]pwd=([^&]+)/);
-  if (mMatch) {
-    var meetingId = mMatch[1];
-    var pwd = pMatch ? pMatch[1] : '';
-    // Abrir app nativa de Zoom
-    var zoomApp = 'zoomus://zoom.us/join?confno=' + meetingId + (pwd ? '&pwd=' + pwd : '');
-    window.location.href = zoomApp;
-    // Fallback al navegador si no tiene Zoom instalado
-    setTimeout(function() {
-      window.open(zoomUrl, '_blank', 'noopener,noreferrer');
-    }, 1500);
+  var url = (DATA && DATA.zoomUrl) ? DATA.zoomUrl.trim() : '';
+  if (!url) { alert('No hay reunión de Zoom programada.'); return; }
+  var m = url.match(/\/j\/(\d+)/);
+  var p = url.match(/[?&]pwd=([^&]+)/);
+  if (m) {
+    window.location.href = 'zoomus://zoom.us/join?confno=' + m[1] + (p ? '&pwd='+p[1] : '');
+    setTimeout(function() { window.open(url, '_blank', 'noopener,noreferrer'); }, 1500);
   } else {
-    window.open(zoomUrl, '_blank', 'noopener,noreferrer');
+    window.open(url, '_blank', 'noopener,noreferrer');
   }
-}
-
-function abrirYoutubeFinal(url) {
-  window.open(url, '_blank', 'noopener,noreferrer');
 }
 
 // ══════════════════════════════════════════
 //  CARGA GOOGLE SHEET
 // ══════════════════════════════════════════
 async function boot() {
-  history.replaceState({ screen: 's-home' }, '');
+  history.replaceState({ screen:'s-home' }, '');
+  var timer = setTimeout(function() {
+    if (!DATA) { DATA = DEMO; revealHome(); }
+  }, 6000);
   try {
-    var url = 'https://sheets.googleapis.com/v4/spreadsheets/' + CFG.sheetId + '/values/' + CFG.tab + '?key=' + CFG.apiKey;
+    var url = 'https://sheets.googleapis.com/v4/spreadsheets/'
+      + CFG.sheetId + '/values/' + CFG.tab + '?key=' + CFG.apiKey;
     var r = await fetch(url);
-    if (!r.ok) throw new Error('sheet error');
+    if (!r.ok) throw new Error('error ' + r.status);
     var j = await r.json();
     var map = {};
-    (j.values || []).forEach(function(row) { if (row[0]) map[row[0].trim()] = row[1] || ''; });
+    (j.values || []).forEach(function(row) {
+      if (row[0]) map[row[0].trim()] = (row[1] || '').trim();
+    });
     var anuncios = [];
     for (var i = 1; i <= 6; i++) {
-      if (map['anuncio_titulo_' + i]) {
+      if (map['anuncio_titulo_'+i]) {
         anuncios.push({
-          fecha:  map['anuncio_fecha_'  + i] || '',
-          titulo: map['anuncio_titulo_' + i],
-          desc:   map['anuncio_desc_'   + i] || ''
+          fecha:  map['anuncio_fecha_'+i]  || '',
+          titulo: map['anuncio_titulo_'+i],
+          desc:   map['anuncio_desc_'+i]   || ''
         });
       }
-    }
-    // Leer pestaña Roles por separado
-    var roles = {};
-    try {
-      var urlRoles = 'https://sheets.googleapis.com/v4/spreadsheets/' + CFG.sheetId + '/values/Roles?key=' + CFG.apiKey;
-      var rRoles = await fetch(urlRoles);
-      if (rRoles.ok) {
-        var jRoles = await rRoles.json();
-        (jRoles.values || []).forEach(function(row) { if (row[0]) roles[row[0].trim()] = row[1] || ''; });
-      }
-    } catch(e2) {}
-    // Convertir claves rol_mes_1..12 a índice numérico
-    var rolesMap = {};
-    for (var rm = 1; rm <= 12; rm++) {
-      rolesMap[rm] = roles['rol_mes_' + rm] || '';
     }
     DATA = {
       liveUrl:   map['live_url']   || '',
       liveLabel: map['live_label'] || 'Culto en Vivo',
       zoomUrl:   map['zoom_url']   || '',
       zoomLabel: map['zoom_label'] || 'Reunión Zoom',
-      roles:     rolesMap,
+      roles:     ROLES_IMGS,
       anuncios:  anuncios
     };
-  } catch(e) {
-    DATA = DEMO;
-  }
+  } catch(e) { DATA = DEMO; }
+  clearTimeout(timer);
+  if (!DATA) DATA = DEMO;
   revealHome();
 }
 
@@ -455,17 +422,12 @@ function revealHome() {
   document.getElementById('homeContent').style.display = 'block';
   var isLive = DATA.liveUrl && DATA.liveUrl.trim() !== '';
   document.getElementById('liveBadge').classList.toggle('show', isLive);
-  document.getElementById('lblLive').textContent = DATA.liveLabel;
+  document.getElementById('lblLive').textContent = DATA.liveLabel || 'Culto en Vivo';
   if (isLive) document.getElementById('btnLive').style.borderColor = 'rgba(220,50,50,0.65)';
   liveUrl = DATA.liveUrl || '';
-  // Zoom
   var hasZoom = DATA.zoomUrl && DATA.zoomUrl.trim() !== '';
   var btnZoom = document.getElementById('btnZoom');
-  if (btnZoom) {
-    btnZoom.style.borderColor = hasZoom ? 'rgba(74,144,217,0.6)' : 'rgba(200,168,75,0.30)';
-    var zLabel = btnZoom.querySelector('.cl');
-    if (zLabel) zLabel.textContent = DATA.zoomLabel || 'Reunión Zoom';
-  }
+  if (btnZoom) btnZoom.style.borderColor = hasZoom ? 'rgba(74,144,217,0.6)' : 'rgba(200,168,75,0.30)';
 }
 
 // ══════════════════════════════════════════
@@ -473,143 +435,94 @@ function revealHome() {
 // ══════════════════════════════════════════
 function loadLive() {
   var url = liveUrl.trim();
-  var icon    = document.getElementById('liveIcon');
-  var titulo  = document.getElementById('liveTitulo');
-  var msg     = document.getElementById('liveMsg');
-  var btnVer  = document.getElementById('liveBtnVer');
-
+  var icon   = document.getElementById('liveIcon');
+  var titulo = document.getElementById('liveTitulo');
+  var msg    = document.getElementById('liveMsg');
+  var btn    = document.getElementById('liveBtnVer');
+  var ph     = document.getElementById('livePH');
   if (!url) {
-    icon.textContent   = '🕊️';
+    icon.textContent   = '\uD83D\uDD4A\uFE0F';
     titulo.textContent = 'Sin transmisión activa';
     msg.textContent    = 'Vuelve pronto para el próximo culto';
-    btnVer.style.display = 'none';
-    document.getElementById('livePH').style.cursor = 'default';
-    document.getElementById('livePH').onclick = null;
+    btn.style.display  = 'none';
+    ph.style.cursor    = 'default';
+    ph.onclick         = null;
     return;
   }
-
-  icon.textContent   = '▶️';
+  icon.textContent   = '\u25B6\uFE0F';
   titulo.textContent = 'Culto en Vivo';
   msg.textContent    = 'Toca para abrir en YouTube';
-  btnVer.style.display = 'inline-block';
-  document.getElementById('livePH').style.cursor = 'pointer';
+  btn.style.display  = 'inline-block';
+  ph.style.cursor    = 'pointer';
 }
 
 function abrirYoutube() {
   var url = liveUrl.trim();
   if (!url) return;
-  var m = url.match(/(?:youtube\.com\/(?:watch\?v=|live\/|shorts\/)|youtu\.be\/)([A-Za-z0-9_-]{11})/);
-  var finalUrl = m ? 'https://www.youtube.com/watch?v=' + m[1] : url;
-  // Abrir directamente en nueva pestaña — funciona en todos los navegadores
-  window.open(finalUrl, '_blank', 'noopener,noreferrer');
+  window.open(url, '_blank', 'noopener,noreferrer');
+}
+
+// ══════════════════════════════════════════
+//  ROL MENSUAL
+// ══════════════════════════════════════════
+function loadRol() {
+  mesSeleccionado = new Date().getMonth() + 1;
+  buildMesesGrid();
+  mostrarRolMes(mesSeleccionado);
+}
+
+function buildMesesGrid() {
+  var meses = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+  var grid = document.getElementById('mesesGrid');
+  grid.innerHTML = '';
+  meses.forEach(function(m, i) {
+    var num = i + 1;
+    var tieneImg = DATA && DATA.roles && DATA.roles[num];
+    var btn = document.createElement('button');
+    btn.textContent = m;
+    btn.style.cssText = 'padding:8px 4px;border-radius:10px;font-size:12px;font-weight:500;cursor:pointer;font-family:Outfit,sans-serif;transition:all .2s;border:1px solid '
+      + (tieneImg ? 'rgba(200,168,75,0.6)' : 'rgba(255,255,255,0.1)')
+      + ';background:' + (num === mesSeleccionado ? 'rgba(200,168,75,0.3)' : 'rgba(255,255,255,0.05)')
+      + ';color:' + (tieneImg ? '#e8c96a' : 'rgba(247,249,245,0.4)') + ';';
+    btn.onclick = function() { mesSeleccionado = num; buildMesesGrid(); mostrarRolMes(num); };
+    grid.appendChild(btn);
+  });
+}
+
+function mostrarRolMes(num) {
+  var meses = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+  var container = document.getElementById('rolContainer');
+  var imgUrl = (DATA && DATA.roles) ? DATA.roles[num] : '';
+  if (!imgUrl) {
+    container.innerHTML = '<p class="bhint">No hay rol para ' + meses[num-1] + '.</p>';
+    return;
+  }
+  container.innerHTML = '<div class="spin-wrap"><div class="spinner"></div></div>';
+  var img = document.createElement('img');
+  img.src = imgUrl;
+  img.alt = 'Rol ' + meses[num-1];
+  img.style.cssText = 'width:100%;display:block;border-radius:14px;';
+  img.onload  = function() { container.innerHTML = ''; container.appendChild(img); };
+  img.onerror = function() { container.innerHTML = '<p class="bhint">No se pudo cargar la imagen de ' + meses[num-1] + '.</p>'; };
 }
 
 // ══════════════════════════════════════════
 //  ANUNCIOS
 // ══════════════════════════════════════════
-function loadRol() {
-  var meses = ['Enero','Febrero','Marzo','Abril','Mayo','Junio',
-               'Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
-  var mesActual = new Date().getMonth() + 1; // 1-12
-  var nombreMes = meses[mesActual - 1];
-  document.getElementById('rolTitulo').textContent = 'Rol — ' + nombreMes;
-  var container = document.getElementById('rolContainer');
-  var imgUrl = (DATA && DATA.roles) ? DATA.roles[mesActual] : '';
-  if (!imgUrl) {
-    container.innerHTML = '<p class="bhint">No hay rol disponible para ' + nombreMes + '.</p>';
-    return;
-  }
-  container.innerHTML = '<img src="' + imgUrl + '" alt="Rol ' + nombreMes + '" style="width:100%;display:block;border-radius:14px;" onerror="this.parentElement.innerHTML='<p class=bhint>No se pudo cargar la imagen del rol.</p>'">';
-}
-
 function renderAnuncios() {
   anunciosReady = true;
   var c = document.getElementById('anunciosCont');
   var lista = (DATA && DATA.anuncios) ? DATA.anuncios : [];
-  if (!lista.length) {
-    c.innerHTML = '<p class="bhint">Sin anuncios por ahora.</p>';
-    return;
-  }
-  var html = '';
+  if (!lista.length) { c.innerHTML = '<p class="bhint">Sin anuncios por ahora.</p>'; return; }
+  var out = '';
   lista.forEach(function(a) {
-    html += '<div class="ac" style="margin-bottom:12px">';
-    if (a.fecha)  html += '<div class="ac-fecha">'  + a.fecha  + '</div>';
-    if (a.titulo) html += '<div class="ac-titulo">' + a.titulo + '</div>';
-    if (a.desc)   html += '<div class="ac-desc">'   + a.desc   + '</div>';
-    html += '</div>';
+    out += '<div class="ac" style="margin-bottom:12px">';
+    if (a.fecha)  out += '<div class="ac-fecha">'  + a.fecha  + '</div>';
+    if (a.titulo) out += '<div class="ac-titulo">' + a.titulo + '</div>';
+    if (a.desc)   out += '<div class="ac-desc">'   + a.desc   + '</div>';
+    out += '</div>';
   });
-  c.innerHTML = html;
-}
-
-// ══════════════════════════════════════════
-//  BIBLIA RV1960
-// ══════════════════════════════════════════
-var LIBROS = [
-  ['Génesis','GEN'],['Éxodo','EXO'],['Levítico','LEV'],['Números','NUM'],['Deuteronomio','DEU'],
-  ['Josué','JOS'],['Jueces','JDG'],['Rut','RUT'],['1 Samuel','1SA'],['2 Samuel','2SA'],
-  ['1 Reyes','1KI'],['2 Reyes','2KI'],['1 Crónicas','1CH'],['2 Crónicas','2CH'],['Esdras','EZR'],
-  ['Nehemías','NEH'],['Ester','EST'],['Job','JOB'],['Salmos','PSA'],['Proverbios','PRO'],
-  ['Eclesiastés','ECC'],['Cantares','SNG'],['Isaías','ISA'],['Jeremías','JER'],['Lamentaciones','LAM'],
-  ['Ezequiel','EZK'],['Daniel','DAN'],['Oseas','HOS'],['Joel','JOL'],['Amós','AMO'],
-  ['Abdías','OBA'],['Jonás','JON'],['Miqueas','MIC'],['Nahúm','NAH'],['Habacuc','HAB'],
-  ['Sofonías','ZEP'],['Hageo','HAG'],['Zacarías','ZEC'],['Malaquías','MAL'],
-  ['Mateo','MAT'],['Marcos','MRK'],['Lucas','LUK'],['Juan','JHN'],['Hechos','ACT'],
-  ['Romanos','ROM'],['1 Corintios','1CO'],['2 Corintios','2CO'],['Gálatas','GAL'],['Efesios','EPH'],
-  ['Filipenses','PHP'],['Colosenses','COL'],['1 Tesalonicenses','1TH'],['2 Tesalonicenses','2TH'],
-  ['1 Timoteo','1TI'],['2 Timoteo','2TI'],['Tito','TIT'],['Filemón','PHM'],['Hebreos','HEB'],
-  ['Santiago','JAS'],['1 Pedro','1PE'],['2 Pedro','2PE'],['1 Juan','1JN'],['2 Juan','2JN'],
-  ['3 Juan','3JN'],['Judas','JUD'],['Apocalipsis','REV']
-];
-var CAPS = {
-  GEN:50,EXO:40,LEV:27,NUM:36,DEU:34,JOS:24,JDG:21,RUT:4,'1SA':31,'2SA':24,
-  '1KI':22,'2KI':25,'1CH':29,'2CH':36,EZR:10,NEH:13,EST:10,JOB:42,PSA:150,
-  PRO:31,ECC:12,SNG:8,ISA:66,JER:52,LAM:5,EZK:48,DAN:12,HOS:14,JOL:3,AMO:9,
-  OBA:1,JON:4,MIC:7,NAH:3,HAB:3,ZEP:3,HAG:2,ZEC:14,MAL:4,MAT:28,MRK:16,
-  LUK:24,JHN:21,ACT:28,ROM:16,'1CO':16,'2CO':13,GAL:6,EPH:6,PHP:4,COL:4,
-  '1TH':5,'2TH':3,'1TI':6,'2TI':4,TIT:3,PHM:1,HEB:13,JAS:5,'1PE':5,'2PE':3,
-  '1JN':5,'2JN':1,'3JN':1,JUD:1,REV:22
-};
-
-function initBible() {
-  bibleReady = true;
-  var sel = document.getElementById('bookSel');
-  LIBROS.forEach(function(b) {
-    var o = document.createElement('option');
-    o.value = b[1]; o.textContent = b[0]; sel.appendChild(o);
-  });
-  fillCaps();
-}
-
-function fillCaps() {
-  var code = document.getElementById('bookSel').value;
-  var sel  = document.getElementById('capSel');
-  sel.innerHTML = '';
-  var total = CAPS[code] || 1;
-  for (var i = 1; i <= total; i++) {
-    var o = document.createElement('option');
-    o.value = i; o.textContent = i; sel.appendChild(o);
-  }
-}
-
-async function loadVerse() {
-  var code = document.getElementById('bookSel').value;
-  var cap  = document.getElementById('capSel').value;
-  var name = '';
-  LIBROS.forEach(function(b) { if (b[1] === code) name = b[0]; });
-  var div = document.getElementById('bibleText');
-  div.innerHTML = '<div class="spin-wrap"><div class="spinner"></div><p class="spin-txt">Cargando…</p></div>';
-  try {
-    var res = await fetch('https://bible-api.com/' + code + '+' + cap + '?translation=rv1960');
-    if (!res.ok) throw new Error('no data');
-    var d = await res.json();
-    var html = '<div class="bref">' + name + ' ' + cap + '</div>';
-    (d.verses || []).forEach(function(v) {
-      html += '<p class="verse"><sup>' + v.verse + '</sup>' + v.text.trim() + '</p>';
-    });
-    div.innerHTML = html;
-  } catch(e) {
-    div.innerHTML = '<div class="bref">' + name + ' ' + cap + '</div><p class="verse"><sup>16</sup>Porque de tal manera amó Dios al mundo, que ha dado a su Hijo unigénito, para que todo aquel que en él cree, no se pierda, mas tenga vida eterna.</p><p class="bhint" style="margin-top:14px">⚠️ Se requiere internet para cargar los capítulos.</p>';
-  }
+  c.innerHTML = out;
 }
 
 // ══════════════════════════════════════════
@@ -619,9 +532,8 @@ if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('sw.js').then(function(reg) {
     reg.addEventListener('updatefound', function() {
       reg.installing.addEventListener('statechange', function() {
-        if (this.state === 'installed' && navigator.serviceWorker.controller) {
+        if (this.state === 'installed' && navigator.serviceWorker.controller)
           document.getElementById('updateBar').classList.add('show');
-        }
       });
     });
   });
