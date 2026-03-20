@@ -61,12 +61,12 @@
     }
     .header {
       width:100%; display:flex; flex-direction:column; align-items:center;
-      padding-top: calc(38px + env(safe-area-inset-top,0px));
-      margin-bottom: 22px;
+      padding-top: calc(18px + env(safe-area-inset-top,0px));
+      margin-bottom: 12px;
     }
     .logo-ring {
-      width:108px; height:108px; border-radius:50%;
-      border:2px solid var(--gold); padding:4px; margin-bottom:16px;
+      width:82px; height:82px; border-radius:50%;
+      border:2px solid var(--gold); padding:4px; margin-bottom:10px;
       animation: pulse 4s ease-in-out infinite;
     }
     .logo-ring img { width:100%; height:100%; border-radius:50%; object-fit:cover; display:block; }
@@ -79,7 +79,7 @@
       0%,100%{box-shadow:0 0 0 0 rgba(200,168,75,0.25),0 0 40px rgba(26,92,58,0.35)}
       50%{box-shadow:0 0 0 9px rgba(200,168,75,0),0 0 60px rgba(26,92,58,0.55)}
     }
-    .app-name { font-family:'Cormorant Garamond',serif; font-size:36px; font-weight:700; letter-spacing:2px; text-align:center; line-height:1; }
+    .app-name { font-family:'Cormorant Garamond',serif; font-size:28px; font-weight:700; letter-spacing:2px; text-align:center; line-height:1; }
     .app-sub { font-size:10px; font-weight:500; letter-spacing:4px; text-transform:uppercase; color:var(--gold); margin-top:6px; text-align:center; }
     .h-line { width:50px; height:1px; background:linear-gradient(90deg,transparent,var(--gold),transparent); margin-top:14px; }
     .live-badge { display:none; align-items:center; gap:6px; background:rgba(220,50,50,0.15); border:1px solid rgba(220,50,50,0.45); border-radius:20px; padding:5px 14px; font-size:11px; font-weight:600; letter-spacing:1.5px; text-transform:uppercase; color:#ff7070; margin-top:12px; }
@@ -342,6 +342,13 @@ function show(id) {
 }
 
 window.addEventListener('popstate', function() {
+  // Si el modal está abierto, cerrarlo primero
+  var modal = document.getElementById('imgModal');
+  if (modal && modal.style.display === 'flex') {
+    cerrarModal();
+    history.pushState({ screen: navStack[navStack.length-1] }, '');
+    return;
+  }
   if (navStack.length > 1) {
     navStack.pop();
     var prev = navStack[navStack.length-1];
@@ -545,6 +552,7 @@ function mostrarRolMes(num) {
 function abrirModal(src) {
   document.getElementById('imgModalSrc').src = src;
   document.getElementById('imgModal').style.display = 'flex';
+  history.pushState({ screen:'modal' }, '');
 }
 
 function cerrarModal() {
