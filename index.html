@@ -205,8 +205,11 @@
         <button class="cb" onclick="show('s-rol')">
           <span class="ci">📅</span><span class="cl gold">Rol Mensual</span>
         </button>
-        <button class="cb span2" id="btnZoom" onclick="abrirZoom()">
-          <span class="ci">📹</span><span class="cl" style="color:#4a90d9">Reunión Zoom</span>
+        <button class="cb span2" id="btnZoom1" onclick="abrirZoom('zoom_url_vanguardia')">
+          <span class="ci">📹</span><span class="cl" style="color:#4a90d9">Reunión Zoom — Vanguardia Femenil</span>
+        </button>
+        <button class="cb span2" id="btnZoom2" onclick="abrirZoom('zoom_url_guardia')">
+          <span class="ci">📹</span><span class="cl" style="color:#4a90d9">Reunión Zoom — Guardia de Oración</span>
         </button>
 
 
@@ -319,7 +322,7 @@ const ROLES_IMGS = {
 
 const DEMO = {
   liveUrl:'', liveLabel:'Culto en Vivo',
-  zoomUrl:'', zoomLabel:'Reunión Zoom',
+  zoom_url_vanguardia:'', zoom_url_guardia:'',
   roles: ROLES_IMGS,
   anuncios:[
     { fecha:'Domingo',   titulo:'Culto de adoración', desc:'A las 11:00 AM. ¡Te esperamos!' },
@@ -389,9 +392,9 @@ function salirApp() {
 
 function openLink(u) { window.open(u, '_blank', 'noopener,noreferrer'); }
 
-function abrirZoom() {
-  var url = (DATA && DATA.zoomUrl) ? DATA.zoomUrl.trim() : '';
-  if (!url) { alert('No hay reunión de Zoom programada.'); return; }
+function abrirZoom(key) {
+  var url = (DATA && DATA[key]) ? DATA[key].trim() : '';
+  if (!url) { alert('No hay reunión de Zoom programada para esta reunión.'); return; }
   var m = url.match(/\/j\/(\d+)/);
   var p = url.match(/[?&]pwd=([^&]+)/);
   if (m) {
@@ -461,12 +464,12 @@ async function boot() {
       rolesFinales[rm] = rolesFromSheet[rm] || ROLES_IMGS[rm] || '';
     }
     DATA = {
-      liveUrl:   map['live_url']   || '',
-      liveLabel: map['live_label'] || 'Culto en Vivo',
-      zoomUrl:   map['zoom_url']   || '',
-      zoomLabel: map['zoom_label'] || 'Reunión Zoom',
-      roles:     rolesFinales,
-      anuncios:  anuncios
+      liveUrl:              map['live_url']              || '',
+      liveLabel:            map['live_label']            || 'Culto en Vivo',
+      zoom_url_vanguardia:  map['zoom_url_vanguardia']   || '',
+      zoom_url_guardia:     map['zoom_url_guardia']      || '',
+      roles:                rolesFinales,
+      anuncios:             anuncios
     };
   } catch(e) { DATA = DEMO; }
   clearTimeout(timer);
@@ -482,9 +485,12 @@ function revealHome() {
   document.getElementById('lblLive').textContent = DATA.liveLabel || 'Culto en Vivo';
   if (isLive) document.getElementById('btnLive').style.borderColor = 'rgba(220,50,50,0.65)';
   liveUrl = DATA.liveUrl || '';
-  var hasZoom = DATA.zoomUrl && DATA.zoomUrl.trim() !== '';
-  var btnZoom = document.getElementById('btnZoom');
-  if (btnZoom) btnZoom.style.borderColor = hasZoom ? 'rgba(74,144,217,0.6)' : 'rgba(200,168,75,0.30)';
+  var hasV = DATA.zoom_url_vanguardia && DATA.zoom_url_vanguardia.trim() !== '';
+  var hasG = DATA.zoom_url_guardia && DATA.zoom_url_guardia.trim() !== '';
+  var btn1 = document.getElementById('btnZoom1');
+  var btn2 = document.getElementById('btnZoom2');
+  if (btn1) btn1.style.borderColor = hasV ? 'rgba(74,144,217,0.6)' : 'rgba(200,168,75,0.30)';
+  if (btn2) btn2.style.borderColor = hasG ? 'rgba(74,144,217,0.6)' : 'rgba(200,168,75,0.30)';
 }
 
 // ══════════════════════════════════════════
