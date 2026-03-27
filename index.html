@@ -206,10 +206,10 @@
         <button class="cb" onclick="show('s-rol')">
           <span class="ci">📅</span><span class="cl gold">Rol Mensual</span>
         </button>
-        <button class="cb span2" id="btnZoom1" onclick="abrirZoom('zoom_url_vanguardia')">
+        <button class="cb span2" id="btnZoom1" onclick="show('s-zoom-vanguardia')">
           <span class="ci">📹</span><span class="cl" style="color:#4a90d9">Reunión Zoom — Vanguardia Femenil</span>
         </button>
-        <button class="cb span2" id="btnZoom2" onclick="abrirZoom('zoom_url_guardia')">
+        <button class="cb span2" id="btnZoom2" onclick="show('s-zoom-guardia')">
           <span class="ci">📹</span><span class="cl" style="color:#4a90d9">Reunión Zoom — Guardia de Oración</span>
         </button>
 
@@ -283,6 +283,40 @@
     <div id="mesesGrid" style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;width:100%"></div>
   </div>
 
+  <!-- ZOOM VANGUARDIA FEMENIL -->
+  <div class="screen" id="s-zoom-vanguardia">
+    <button class="back" onclick="show('s-home')">← Inicio</button>
+    <div class="sh"><h2>Vanguardia Femenil</h2><div class="sh-line"></div></div>
+    <div class="live-frame-wrap" id="zoomWrap1">
+      <div class="live-ph" id="zoomPH1">
+        <span style="font-size:44px;display:block;margin-bottom:12px">📹</span>
+        <span id="zoomTitulo1" style="font-size:16px;font-weight:600;color:#f7f9f5;display:block;margin-bottom:6px"></span>
+        <span id="zoomMsg1" style="font-size:13px;color:rgba(247,249,245,0.6);display:block;margin-bottom:18px"></span>
+        <span id="zoomBtn1" style="display:none;background:#4a90d9;color:#fff;padding:11px 28px;border-radius:22px;font-size:14px;font-weight:600">Unirse a la reunión</span>
+      </div>
+    </div>
+    <p style="font-size:12px;color:var(--dim);text-align:center;line-height:1.65">
+      El enlace se actualiza automáticamente antes de cada reunión.
+    </p>
+  </div>
+
+  <!-- ZOOM GUARDIA DE ORACION -->
+  <div class="screen" id="s-zoom-guardia">
+    <button class="back" onclick="show('s-home')">← Inicio</button>
+    <div class="sh"><h2>Guardia de Oración</h2><div class="sh-line"></div></div>
+    <div class="live-frame-wrap" id="zoomWrap2">
+      <div class="live-ph" id="zoomPH2">
+        <span style="font-size:44px;display:block;margin-bottom:12px">🙏</span>
+        <span id="zoomTitulo2" style="font-size:16px;font-weight:600;color:#f7f9f5;display:block;margin-bottom:6px"></span>
+        <span id="zoomMsg2" style="font-size:13px;color:rgba(247,249,245,0.6);display:block;margin-bottom:18px"></span>
+        <span id="zoomBtn2" style="display:none;background:#4a90d9;color:#fff;padding:11px 28px;border-radius:22px;font-size:14px;font-weight:600">Unirse a la reunión</span>
+      </div>
+    </div>
+    <p style="font-size:12px;color:var(--dim);text-align:center;line-height:1.65">
+      El enlace se actualiza automáticamente antes de cada reunión.
+    </p>
+  </div>
+
   <!-- UPDATE BAR -->
 <div class="update-bar" id="updateBar" onclick="location.reload()">🔄 Hay nuevo contenido – toca para actualizar</div>
 
@@ -353,8 +387,10 @@ function show(id) {
     history.pushState({ screen:id }, '');
   }
   if (id === 's-anuncios' && !anunciosReady) renderAnuncios();
-  if (id === 's-live')    loadLive();
-  if (id === 's-rol')     loadRol();
+  if (id === 's-live')             loadLive();
+  if (id === 's-rol')              loadRol();
+  if (id === 's-zoom-vanguardia')  loadZoom('zoom_url_vanguardia', 1);
+  if (id === 's-zoom-guardia')     loadZoom('zoom_url_guardia', 2);
 }
 
 window.addEventListener('popstate', function() {
@@ -392,6 +428,28 @@ function salirApp() {
 }
 
 function openLink(u) { window.open(u, '_blank', 'noopener,noreferrer'); }
+
+function loadZoom(key, num) {
+  var url = (DATA && DATA[key]) ? DATA[key].trim() : '';
+  var titulo = document.getElementById('zoomTitulo' + num);
+  var msg    = document.getElementById('zoomMsg' + num);
+  var btn    = document.getElementById('zoomBtn' + num);
+  var ph     = document.getElementById('zoomPH' + num);
+
+  if (!url) {
+    titulo.textContent = 'Sin reunión activa';
+    msg.textContent    = 'No hay reunión programada en este momento';
+    btn.style.display  = 'none';
+    ph.style.cursor    = 'default';
+    ph.onclick         = null;
+    return;
+  }
+  titulo.textContent = 'Reunión disponible';
+  msg.textContent    = 'Toca para unirte a la reunión';
+  btn.style.display  = 'inline-block';
+  ph.style.cursor    = 'pointer';
+  ph.onclick         = function() { abrirZoom(key); };
+}
 
 function abrirZoom(key) {
   var url = (DATA && DATA[key]) ? DATA[key].trim() : '';
