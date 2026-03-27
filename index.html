@@ -429,8 +429,13 @@ function salirApp() {
 
 function openLink(u) { window.open(u, '_blank', 'noopener,noreferrer'); }
 
+function esUrlValida(url) {
+  return url && (url.startsWith('http://') || url.startsWith('https://') || url.startsWith('zoomus://'));
+}
+
 function loadZoom(key, num) {
-  var url = (DATA && DATA[key]) ? DATA[key].trim() : '';
+  var raw = (DATA && DATA[key]) ? DATA[key].trim() : '';
+  var url = esUrlValida(raw) ? raw : '';
   var titulo = document.getElementById('zoomTitulo' + num);
   var msg    = document.getElementById('zoomMsg' + num);
   var btn    = document.getElementById('zoomBtn' + num);
@@ -452,7 +457,8 @@ function loadZoom(key, num) {
 }
 
 function abrirZoom(key) {
-  var url = (DATA && DATA[key]) ? DATA[key].trim() : '';
+  var raw = (DATA && DATA[key]) ? DATA[key].trim() : '';
+  var url = esUrlValida(raw) ? raw : '';
   if (!url) { mostrarToast('No hay reunión activa en este momento'); return; }
   var m = url.match(/\/j\/(\d+)/);
   var p = url.match(/[?&]pwd=([^&]+)/);
@@ -530,8 +536,8 @@ async function boot() {
       rolesFinales[rm] = rolesFromSheet[rm] || ROLES_IMGS[rm] || '';
     }
     DATA = {
-      liveUrl:              map['live_url']              || '',
-      liveLabel:            map['live_label']            || 'Culto en Vivo',
+      liveUrl:              map['youtube_live_url']              || '',
+      liveLabel:            map['youtube_live_label']            || 'Culto en Vivo',
       zoom_url_vanguardia:  map['zoom_url_vanguardia']   || '',
       zoom_url_guardia:     map['zoom_url_guardia']      || '',
       roles:                rolesFinales,
@@ -563,7 +569,8 @@ function revealHome() {
 //  CULTO EN VIVO
 // ══════════════════════════════════════════
 function loadLive() {
-  var url = liveUrl.trim();
+  var raw = liveUrl.trim();
+  var url = esUrlValida(raw) ? raw : '';
   var icon   = document.getElementById('liveIcon');
   var titulo = document.getElementById('liveTitulo');
   var msg    = document.getElementById('liveMsg');
