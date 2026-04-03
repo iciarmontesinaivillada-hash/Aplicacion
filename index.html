@@ -173,7 +173,7 @@
 
 <header class="header">
     <div class="logo-ring">
-      <img src="https://raw.githubusercontent.com/iciarmontesinaivillada-hash/Aplicacion/main/icon-512.png" alt="Logo ICIAR Villada" onerror="this.style.display='none';document.querySelector('.logo-fallback').style.display='flex'" />
+      <img src="icon-512.png" alt="Logo ICIAR Villada" onerror="this.style.display='none';document.querySelector('.logo-fallback').style.display='flex'" />
       <div class="logo-fallback">🕊️</div>
     </div>
     <h1 class="app-name">ICIAR Villada</h1>
@@ -273,9 +273,8 @@
 
     </div>
   </div>
-</div>
 
-      <!-- ROL MENSUAL -->
+  <!-- ROL MENSUAL -->
   <div class="screen" id="s-rol" style="gap:8px">
     <button class="back" onclick="show('s-home')" style="margin-bottom:0">← Inicio</button>
     <div class="sh" style="margin-bottom:0"><h2>Rol Mensual</h2><div class="sh-line"></div></div>
@@ -321,8 +320,9 @@
 <div class="update-bar" id="updateBar" onclick="location.reload()">🔄 Hay nuevo contenido – toca para actualizar</div>
 
 <!-- MODAL IMAGEN GRANDE -->
-<div id="imgModal" style="display:none;position:fixed;inset:0;z-index:999;background:rgba(0,0,0,0.92);align-items:center;justify-content:center;padding:20px;" onclick="cerrarModal()">
-  <img id="imgModalSrc" src="" style="max-width:100%;max-height:90vh;border-radius:12px;object-fit:contain;" />
+<div id="imgModal" style="display:none;position:fixed;inset:0;z-index:999;background:rgba(0,0,0,0.92);align-items:center;justify-content:center;padding:20px;">
+  <img id="imgModalSrc" src="" style="max-width:100%;max-height:90vh;border-radius:12px;object-fit:contain;touch-action:pinch-zoom;transition:transform 0.2s;" />
+  <button onclick="cerrarModal()" style="position:absolute;top:16px;right:16px;background:rgba(255,255,255,0.15);border:none;border-radius:50%;width:38px;height:38px;color:#fff;font-size:18px;cursor:pointer;line-height:1;">✕</button>
 </div>
 
 <!-- DIÁLOGO SALIR -->
@@ -407,9 +407,6 @@ window.addEventListener('popstate', function() {
     document.querySelectorAll('.screen').forEach(function(s) { s.classList.remove('active'); });
     document.getElementById(prev).classList.add('active');
     window.scrollTo({ top:0, behavior:'smooth' });
-
-    var hdr = document.querySelector('.header');
-    if (hdr) hdr.classList.toggle('compact', prev !== 's-home');
     if (prev === 's-live') loadLive();
     history.pushState({ screen:prev }, '');
   } else {
@@ -646,14 +643,32 @@ function mostrarRolMes(num) {
 }
 
 function abrirModal(src) {
-  document.getElementById('imgModalSrc').src = src;
-  document.getElementById('imgModal').style.display = 'flex';
+  var img = document.getElementById('imgModalSrc');
+  var modal = document.getElementById('imgModal');
+  img.src = src;
+  img.style.transform = 'scale(1)';
+  modal.style.display = 'flex';
   history.pushState({ screen:'modal' }, '');
+  var lastTap = 0;
+  var zoomed = false;
+  img.ontouchend = function(e) {
+    var now = Date.now();
+    if (now - lastTap < 300) {
+      zoomed = !zoomed;
+      img.style.transform = zoomed ? 'scale(2.5)' : 'scale(1)';
+      e.preventDefault();
+    }
+    lastTap = now;
+  };
+  modal.onclick = function(e) { if (e.target === modal) cerrarModal(); };
 }
 
 function cerrarModal() {
-  document.getElementById('imgModal').style.display = 'none';
-  document.getElementById('imgModalSrc').src = '';
+  var modal = document.getElementById('imgModal');
+  var img = document.getElementById('imgModalSrc');
+  modal.style.display = 'none';
+  img.src = '';
+  img.style.transform = 'scale(1)';
 }
 
 // ══════════════════════════════════════════
@@ -689,7 +704,46 @@ if ('serviceWorker' in navigator) {
   });
 }
 
+// ══════════════════════════════════════════
+//  NOTIFICACIONES PUSH — FIREBASE / CAPACITOR
+// ══════════════════════════════════════════
+async function iniciarNotificaciones() {
+  try {
+    if (!window.Capacitor || !window.Capacitor.isNativePlatform()) return;
+    var PushNotifications = window.Capacitor.Plugins.PushNotifications;
+    if (!PushNotifications) return;
+
+    var permiso = await PushNotifications.requestPermissions();
+    if (permiso.receive !== 'granted') return;
+
+    await PushNotifications.register();
+
+    // Notificación recibida con app abierta
+    PushNotifications.addListener('pushNotificationReceived', function(n) {
+      mostrarToast((n.title || '') + (n.body ? ': ' + n.body : ''));
+    });
+
+    // Usuario toca la notificación
+    PushNotifications.addListener('pushNotificationActionPerformed', function(a) {
+      var data = a.notification.data;
+      if (data && data.pantalla) show(data.pantalla);
+    });
+
+    PushNotifications.addListener('registration', function(t) {
+      console.log('FCM Token:', t.value);
+    });
+
+    PushNotifications.addListener('registrationError', function(e) {
+      console.log('Error registro FCM:', e);
+    });
+
+  } catch(e) {
+    console.log('Push no disponible:', e);
+  }
+}
+
 boot();
+iniciarNotificaciones();
 </script>
 
 <!-- TOAST -->
