@@ -1185,6 +1185,8 @@ async function enviarPeticion() {
   try {
     await fetch(PETICIONES_URL, {
       method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'text/plain' },
       body: JSON.stringify(nueva)
     });
     document.getElementById('petNombre').value    = '';
@@ -1203,6 +1205,8 @@ async function marcarRespondida(id) {
   try {
     await fetch(PETICIONES_URL, {
       method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'text/plain' },
       body: JSON.stringify({ accion: 'responder', id: id })
     });
     mostrarToast('¡Gloria a Dios! 🙌');
@@ -1291,10 +1295,12 @@ function renderPeticiones(lista) {
 
     // Tap en la tarjeta abre modal (excepto en el botón respondida)
     card.style.cursor = 'pointer';
-    card.onclick = function(e) {
-      if (e.target.tagName === 'BUTTON') return;
-      abrirPetModal(p, esMia);
-    };
+    (function(peticion, esMiaPet) {
+      card.onclick = function(e) {
+        if (e.target.tagName === 'BUTTON') return;
+        abrirPetModal(peticion, esMiaPet);
+      };
+    })(p, esMia);
 
     cont.appendChild(card);
   });
