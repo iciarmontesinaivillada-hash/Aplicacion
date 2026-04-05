@@ -123,18 +123,32 @@
     .sh { display:flex; flex-direction:column; align-items:center; margin-bottom:2px; }
     .sh h2 { font-family:'Cormorant Garamond',serif; font-size:26px; font-weight:600; text-align:center; }
     .sh-line { width:36px; height:1px; background:linear-gradient(90deg,transparent,var(--gold),transparent); margin-top:6px; }
-    .back { background:none; border:none; color:var(--gold); font-family:'Outfit',sans-serif; font-size:12px; font-weight:500; letter-spacing:2px; text-transform:uppercase; cursor:pointer; padding:6px 0; display:flex; align-items:center; gap:5px; align-self:flex-start; opacity:.8; transition:opacity .2s; }
-    .back:hover { opacity:1; }
+    .back { background:rgba(200,168,75,0.15); border:1px solid rgba(200,168,75,0.4); border-radius:20px; color:var(--gold); font-family:'Outfit',sans-serif; font-size:14px; font-weight:600; letter-spacing:1px; text-transform:uppercase; cursor:pointer; padding:10px 18px; display:flex; align-items:center; gap:6px; align-self:flex-start; transition:all .2s; margin-bottom:4px; }
+    .back:active { background:rgba(200,168,75,0.3); transform:scale(0.97); }
     .soc { display:flex; align-items:center; gap:14px; background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.09); border-radius:14px; padding:15px 18px; cursor:pointer; text-decoration:none; color:var(--white); transition:all .2s ease; }
     .soc:active { background:rgba(255,255,255,0.09); border-color:var(--gold-d); transform:translateX(4px); }
     .si { width:40px; height:40px; border-radius:11px; display:flex; align-items:center; justify-content:center; font-size:19px; flex-shrink:0; }
     .si-fb{background:#1877f2} .si-yt{background:#ff0000} .si-ig{background:linear-gradient(135deg,#833ab4,#fd1d1d,#fcb045)} .si-tt{background:#111;border:1px solid #333}
     .sn { font-size:14px; font-weight:500; } .sh2 { font-size:11px; color:var(--dim); margin-top:2px; }
     .sa { color:var(--gold); opacity:.6; font-size:14px; }
-    .ac { background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.09); border-radius:14px; padding:16px 18px; }
-    .ac-fecha { font-size:10px; font-weight:500; letter-spacing:2px; text-transform:uppercase; color:var(--gold); margin-bottom:6px; }
-    .ac-titulo { font-size:15px; font-weight:500; margin-bottom:5px; }
-    .ac-desc { font-size:13px; color:rgba(247,249,245,0.70); line-height:1.65; }
+    .ac {
+      background:rgba(255,255,255,0.07);
+      border:1.5px solid rgba(200,168,75,0.6);
+      border-radius:14px; padding:20px;
+      cursor:pointer; transition:all 0.3s ease;
+      box-shadow: 0 0 12px rgba(200,168,75,0.15);
+    }
+    .ac:active { transform:scale(0.98); }
+    .ac.leido {
+      background:rgba(255,255,255,0.02);
+      border-color:rgba(255,255,255,0.08);
+      box-shadow: none;
+      opacity:0.5;
+    }
+    .ac-fecha { font-size:13px; font-weight:500; letter-spacing:2px; text-transform:uppercase; color:var(--gold); margin-bottom:8px; }
+    .ac-titulo { font-size:20px; font-weight:600; margin-bottom:8px; line-height:1.4; }
+    .ac-desc { font-size:17px; color:rgba(247,249,245,0.80); line-height:1.75; }
+    .ac-nuevo { display:inline-block; background:var(--gold); color:var(--g-deep); font-size:10px; font-weight:700; padding:2px 8px; border-radius:10px; letter-spacing:1px; text-transform:uppercase; margin-bottom:8px; }
     .live-frame-wrap { width:100%; border-radius:14px; overflow:hidden; border:1px solid rgba(220,50,50,0.28); background:#111; }
     .live-ph { width:100%; padding:40px 20px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px; text-align:center; cursor:pointer; }
     .live-ph:active { opacity:0.8; }
@@ -173,7 +187,7 @@
 
 <header class="header">
     <div class="logo-ring">
-      <img src="icon-512.png" alt="Logo ICIAR Villada" onerror="this.style.display='none';document.querySelector('.logo-fallback').style.display='flex'" />
+      <img src="https://raw.githubusercontent.com/iciarmontesinaivillada-hash/Aplicacion/main/icon-512.png" alt="Logo ICIAR Villada" onerror="this.style.display='none';document.querySelector('.logo-fallback').style.display='flex'" />
       <div class="logo-fallback">🕊️</div>
     </div>
     <h1 class="app-name">ICIAR Villada</h1>
@@ -207,12 +221,17 @@
           <span class="ci">📅</span><span class="cl gold">Rol Mensual</span>
         </button>
         <button class="cb span2" id="btnZoom1" onclick="show('s-zoom-vanguardia')">
-          <span class="ci">📹</span><span class="cl" style="color:#4a90d9">Reunión Zoom — Vanguardia Femenil</span>
+          <span class="ci">🙋‍♀️</span><span class="cl" style="color:var(--white)">Reunión Zoom — Vanguardia Femenil</span>
         </button>
         <button class="cb span2" id="btnZoom2" onclick="show('s-zoom-guardia')">
-          <span class="ci">📹</span><span class="cl" style="color:#4a90d9">Reunión Zoom — Guardia de Oración</span>
+          <span class="ci">🙏</span><span class="cl" style="color:var(--gold-l)">Reunión Zoom — Guardia de Oración</span>
         </button>
-
+        <button class="cb" onclick="show('s-peticiones')">
+          <span class="ci">🕊️</span><span class="cl" style="color:var(--gold-l)">Petición de Oración</span>
+        </button>
+        <button class="cb" onclick="show('s-motivos')">
+          <span class="ci">📋</span><span class="cl">Motivos de Oración</span>
+        </button>
 
       </div>
     </div>
@@ -273,9 +292,10 @@
 
     </div>
   </div>
+</div>
 
-  <!-- ROL MENSUAL -->
-  <div class="screen" id="s-rol" style="gap:8px">
+      <!-- ROL MENSUAL -->
+  <div class="screen" id="s-rol" style="gap:8px;overflow-y:auto;padding-bottom:40px;">
     <button class="back" onclick="show('s-home')" style="margin-bottom:0">← Inicio</button>
     <div class="sh" style="margin-bottom:0"><h2>Rol Mensual</h2><div class="sh-line"></div></div>
     <div id="rolContainer" style="width:100%;border-radius:14px;overflow:hidden"></div>
@@ -316,13 +336,89 @@
     </p>
   </div>
 
+  <!-- PETICIÓN DE ORACIÓN — solo formulario -->
+  <div class="screen" id="s-peticiones" style="gap:13px;">
+    <button class="back" onclick="show('s-home')">← Inicio</button>
+    <div class="sh"><h2>Petición de Oración</h2><div class="sh-line"></div></div>
+    <div style="background:rgba(255,255,255,0.05);border:1px solid rgba(200,168,75,0.3);border-radius:16px;padding:18px;display:flex;flex-direction:column;gap:12px;">
+      <p style="font-size:12px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:var(--gold);">Nueva petición</p>
+      <input id="petNombre" type="text" placeholder="Tu nombre (opcional)"
+        style="background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.12);border-radius:10px;color:var(--white);font-family:'Outfit',sans-serif;font-size:14px;padding:11px 14px;outline:none;width:100%;" />
+      <select id="petCategoria"
+        style="background:#0b3520;border:1px solid rgba(255,255,255,0.12);border-radius:10px;color:var(--white);font-family:'Outfit',sans-serif;font-size:14px;padding:11px 14px;outline:none;width:100%;-webkit-appearance:none;appearance:none;">
+        <option value="">— Categoría —</option>
+        <option value="Sanidad">🌿 Sanidad</option>
+        <option value="Trabajo">💼 Trabajo</option>
+        <option value="Conversión">✝️ Conversión</option>
+        <option value="Otro motivo">🙏 Otro motivo</option>
+      </select>
+      <textarea id="petTexto" placeholder="Escribe tu petición aquí…" rows="5"
+        style="background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.12);border-radius:10px;color:var(--white);font-family:'Outfit',sans-serif;font-size:14px;padding:11px 14px;outline:none;width:100%;resize:none;line-height:1.6;"></textarea>
+      <button onclick="enviarPeticion()"
+        style="background:var(--gold);border:none;border-radius:12px;color:var(--g-deep);font-family:'Outfit',sans-serif;font-size:14px;font-weight:700;padding:13px;cursor:pointer;width:100%;">
+        Enviar petición 🕊️
+      </button>
+    </div>
+    <p style="font-size:12px;color:var(--dim);text-align:center;line-height:1.65">
+      Tu petición será visible para todos los hermanos en "Motivos de Oración".
+    </p>
+  </div>
+
+  <!-- MOTIVOS DE ORACIÓN — solo lista -->
+  <div class="screen" id="s-motivos" style="gap:13px;overflow-y:auto;padding-bottom:40px;">
+    <button class="back" onclick="show('s-home')">← Inicio</button>
+    <div class="sh"><h2>Motivos de Oración</h2><div class="sh-line"></div></div>
+    <div id="petListaCont" style="display:flex;flex-direction:column;gap:10px;width:100%;"></div>
+  </div>
+
   <!-- UPDATE BAR -->
 <div class="update-bar" id="updateBar" onclick="location.reload()">🔄 Hay nuevo contenido – toca para actualizar</div>
 
 <!-- MODAL IMAGEN GRANDE -->
-<div id="imgModal" style="display:none;position:fixed;inset:0;z-index:999;background:rgba(0,0,0,0.92);align-items:center;justify-content:center;padding:20px;">
-  <img id="imgModalSrc" src="" style="max-width:100%;max-height:90vh;border-radius:12px;object-fit:contain;touch-action:pinch-zoom;transition:transform 0.2s;" />
-  <button onclick="cerrarModal()" style="position:absolute;top:16px;right:16px;background:rgba(255,255,255,0.15);border:none;border-radius:50%;width:38px;height:38px;color:#fff;font-size:18px;cursor:pointer;line-height:1;">✕</button>
+<div id="imgModal" style="display:none;position:fixed;inset:0;z-index:999;background:#000;visibility:hidden;overflow:hidden;touch-action:none;">
+  <img id="imgModalSrc" src="" style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);max-width:100%;max-height:100%;object-fit:contain;touch-action:none;" />
+</div>
+  </div>
+</div>
+</div>
+
+</div>
+
+</div>
+
+<!-- MODAL ANUNCIO -->
+<div id="anuncioModal" style="display:none;position:fixed;inset:0;z-index:998;background:rgba(0,0,0,0.75);align-items:center;justify-content:center;padding:20px;">
+  <div style="background:#1a5c3a;border:1px solid rgba(200,168,75,0.4);border-radius:20px;padding:30px 24px;width:92%;max-width:400px;max-height:85vh;overflow-y:auto;">
+    <div id="anuncioModalFecha" style="font-size:13px;font-weight:500;letter-spacing:2px;text-transform:uppercase;color:var(--gold);margin-bottom:12px;"></div>
+    <div id="anuncioModalTitulo" style="font-size:26px;font-weight:700;color:#f7f9f5;margin-bottom:16px;line-height:1.3;"></div>
+    <div id="anuncioModalDesc" style="font-size:20px;color:rgba(247,249,245,0.85);line-height:1.8;margin-bottom:24px;"></div>
+    <button onclick="cerrarAnuncioModal()" style="width:100%;padding:14px;border-radius:12px;border:none;background:var(--gold);color:var(--g-deep);font-size:16px;font-weight:700;cursor:pointer;font-family:'Outfit',sans-serif;">Entendido</button>
+  </div>
+</div>
+
+<!-- MODAL PETICIÓN DE ORACIÓN -->
+<div id="petModal" style="display:none;position:fixed;inset:0;z-index:998;background:rgba(0,0,0,0.75);align-items:center;justify-content:center;padding:20px;">
+  <div style="background:#1a5c3a;border:1px solid rgba(200,168,75,0.4);border-radius:20px;padding:30px 24px;width:92%;max-width:400px;max-height:85vh;overflow-y:auto;">
+    <div id="petModalBadge" style="margin-bottom:14px;"></div>
+    <div id="petModalFecha" style="font-size:12px;color:var(--dim);margin-bottom:14px;"></div>
+    <div id="petModalTexto" style="font-size:18px;color:rgba(247,249,245,0.9);line-height:1.8;margin-bottom:16px;"></div>
+    <div id="petModalAutor" style="font-size:13px;color:var(--dim);margin-bottom:24px;"></div>
+    <div id="petModalBtnRespondida" style="margin-bottom:12px;"></div>
+    <button onclick="cerrarPetModal()" style="width:100%;padding:14px;border-radius:12px;border:none;background:var(--gold);color:var(--g-deep);font-size:16px;font-weight:700;cursor:pointer;font-family:'Outfit',sans-serif;">Cerrar</button>
+  </div>
+</div>
+
+<!-- MODAL CONFIRMAR RESPONDIDA -->
+<div id="petConfirmModal" style="display:none;position:fixed;inset:0;z-index:999;background:rgba(0,0,0,0.8);align-items:center;justify-content:center;padding:20px;">
+  <div style="background:#1a5c3a;border:1px solid rgba(46,138,87,0.6);border-radius:20px;padding:30px 24px;width:88%;max-width:340px;text-align:center;">
+    <div style="font-size:40px;margin-bottom:14px;">🙌</div>
+    <div style="font-size:18px;font-weight:700;color:var(--white);margin-bottom:10px;">¿Tu oración fue respondida?</div>
+    <div style="font-size:14px;color:var(--dim);line-height:1.6;margin-bottom:24px;">Esta petición se marcará como respondida y todos podrán verlo. ¡Gloria a Dios!</div>
+    <div style="display:flex;gap:10px;">
+      <button onclick="cerrarConfirmModal()" style="flex:1;padding:13px;border-radius:12px;border:1px solid rgba(200,168,75,0.4);background:transparent;color:var(--gold-l);font-size:14px;font-weight:500;cursor:pointer;font-family:'Outfit',sans-serif;">No, aún no</button>
+      <button onclick="confirmarRespondida()" style="flex:1;padding:13px;border-radius:12px;border:none;background:#2e8a57;color:#fff;font-size:14px;font-weight:700;cursor:pointer;font-family:'Outfit',sans-serif;">¡Sí, gloria a Dios!</button>
+    </div>
+  </div>
 </div>
 
 <!-- DIÁLOGO SALIR -->
@@ -407,6 +503,9 @@ window.addEventListener('popstate', function() {
     document.querySelectorAll('.screen').forEach(function(s) { s.classList.remove('active'); });
     document.getElementById(prev).classList.add('active');
     window.scrollTo({ top:0, behavior:'smooth' });
+
+    var hdr = document.querySelector('.header');
+    if (hdr) hdr.classList.toggle('compact', prev !== 's-home');
     if (prev === 's-live') loadLive();
     history.pushState({ screen:prev }, '');
   } else {
@@ -419,9 +518,17 @@ function cerrarDialogo() { document.getElementById('exitDialog').classList.remov
 
 function salirApp() {
   document.getElementById('exitDialog').classList.remove('show');
-  try { history.go(-history.length); } catch(e) {}
-  setTimeout(function() { try { window.close(); } catch(e) {} }, 100);
-  setTimeout(function() { try { window.location.href='about:blank'; } catch(e) {} }, 300);
+  try {
+    // Usar el plugin oficial de Capacitor para cerrar la app
+    if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.App) {
+      window.Capacitor.Plugins.App.exitApp();
+    } else {
+      // Fallback para navegador
+      window.close();
+    }
+  } catch(e) {
+    window.close();
+  }
 }
 
 function openLink(u) { window.open(u, '_blank', 'noopener,noreferrer'); }
@@ -431,26 +538,35 @@ function esUrlValida(url) {
 }
 
 function loadZoom(key, num) {
-  var raw = (DATA && DATA[key]) ? DATA[key].trim() : '';
-  var url = esUrlValida(raw) ? raw : '';
+  var raw    = (DATA && DATA[key]) ? DATA[key].trim() : '';
+  var url    = esUrlValida(raw) ? raw : '';
   var titulo = document.getElementById('zoomTitulo' + num);
   var msg    = document.getElementById('zoomMsg' + num);
   var btn    = document.getElementById('zoomBtn' + num);
   var ph     = document.getElementById('zoomPH' + num);
+  var screenId   = num === 1 ? 's-zoom-vanguardia' : 's-zoom-guardia';
+  var tipoEvento = num === 1 ? 'vanguardia' : 'guardia';
 
-  if (!url) {
-    titulo.textContent = 'Sin reunión activa';
-    msg.textContent    = 'No hay reunión programada en este momento';
-    btn.style.display  = 'none';
-    ph.style.cursor    = 'default';
-    ph.onclick         = null;
+  // Ventana activa: desde 10 min antes hasta 90 min después del inicio
+  var minHoy    = minParaEventoHoy(tipoEvento); // null si no hay reunión hoy
+  var enVentana = minHoy !== null && minHoy >= -90 && minHoy <= 10;
+
+  if (url && enVentana) {
+    quitarHorarios(screenId);
+    titulo.textContent = minHoy <= 0 ? 'Reunión en curso' : 'Reunión en ' + Math.abs(minHoy) + ' min';
+    msg.textContent    = 'Toca para unirte a la reunión';
+    btn.style.display  = 'inline-block';
+    ph.style.cursor    = 'pointer';
+    ph.onclick         = function() { abrirZoom(key); };
     return;
   }
-  titulo.textContent = 'Reunión disponible';
-  msg.textContent    = 'Toca para unirte a la reunión';
-  btn.style.display  = 'inline-block';
-  ph.style.cursor    = 'pointer';
-  ph.onclick         = function() { abrirZoom(key); };
+  // Fuera de ventana → horarios con contador
+  titulo.textContent = 'Sin reunión activa';
+  msg.textContent    = formatFaltante(minParaEvento(tipoEvento)) + ' para la próxima reunión';
+  btn.style.display  = 'none';
+  ph.style.cursor    = 'default';
+  ph.onclick         = null;
+  inyectarHorarios(screenId, tipoEvento);
 }
 
 function abrirZoom(key) {
@@ -549,6 +665,15 @@ async function boot() {
 function revealHome() {
   document.getElementById('homeLoad').style.display = 'none';
   document.getElementById('homeContent').style.display = 'block';
+  // Resetear leídos si cambiaron los anuncios
+  var nuevaClave = JSON.stringify((DATA.anuncios || []).map(function(a){ return a.titulo; }));
+  if (localStorage.getItem('anuncios_cache') !== nuevaClave) {
+    localStorage.setItem('anuncios_cache', nuevaClave);
+    for (var k in Object.keys(localStorage)) {
+      var key = Object.keys(localStorage)[k];
+      if (key && key.indexOf('anuncio_leido_') === 0) localStorage.removeItem(key);
+    }
+  }
   var isLive = DATA.liveUrl && DATA.liveUrl.trim() !== '';
   document.getElementById('liveBadge').classList.toggle('show', isLive);
   document.getElementById('lblLive').textContent = DATA.liveLabel || 'Culto en Vivo';
@@ -565,6 +690,103 @@ function revealHome() {
 // ══════════════════════════════════════════
 //  CULTO EN VIVO
 // ══════════════════════════════════════════
+// ── Helpers de horarios ──────────────────────────────────────────────────
+var HORARIOS = [
+  { dia:0, h:11, m:0,  nombre:'Culto Dominical',   tipo:'live',       icono:'⛪' },
+  { dia:2, h:19, m:0,  nombre:'Culto Martes',       tipo:'live',       icono:'📺' },
+  { dia:4, h:19, m:0,  nombre:'Culto Jueves',       tipo:'live',       icono:'📺' },
+  { dia:1, h:9,  m:0,  nombre:'Guardia de Oración', tipo:'guardia',    icono:'🙏' },
+  { dia:3, h:19, m:0,  nombre:'Vanguardia Femenil', tipo:'vanguardia', icono:'📹' }
+];
+var NOMBRES_DIA = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+
+function minParaEvento(tipo) {
+  var ahora  = new Date();
+  var diaSem = ahora.getDay();
+  var minNow = ahora.getHours() * 60 + ahora.getMinutes();
+  var mejor  = 99999;
+  HORARIOS.forEach(function(h) {
+    if ((tipo === 'live') ? h.tipo !== 'live' : h.tipo !== tipo) return;
+    var diasDif = (h.dia - diaSem + 7) % 7;
+    var diff    = diasDif * 1440 + h.h * 60 + h.m - minNow;
+    // Para el contador de "próxima reunión" siempre queremos el más cercano en el futuro
+    if (diff <= 0) diff += 7 * 1440;
+    if (diff < mejor) mejor = diff;
+  });
+  return mejor;
+}
+
+// Minutos hasta el evento de HOY (puede ser negativo si ya pasó)
+// Usado para detectar la ventana de activación del Zoom
+function minParaEventoHoy(tipo) {
+  var ahora  = new Date();
+  var diaSem = ahora.getDay();
+  var minNow = ahora.getHours() * 60 + ahora.getMinutes();
+  var resultado = null;
+  HORARIOS.forEach(function(h) {
+    if (h.tipo !== tipo) return;
+    if (h.dia !== diaSem) return;
+    var diff = h.h * 60 + h.m - minNow;
+    if (resultado === null || Math.abs(diff) < Math.abs(resultado)) resultado = diff;
+  });
+  return resultado; // null si no hay evento hoy
+}
+
+function formatFaltante(min) {
+  if (min < 60)  return 'En ' + min + ' min';
+  var h = Math.floor(min / 60), m = min % 60;
+  if (h < 24)    return 'En ' + h + 'h' + (m ? ' ' + m + 'm' : '');
+  var d = Math.floor(h / 24);
+  return 'En ' + d + (d === 1 ? ' día' : ' días');
+}
+
+function bloqueHorarios(tipo) {
+  var ahora  = new Date();
+  var diaSem = ahora.getDay();
+  var minNow = ahora.getHours() * 60 + ahora.getMinutes();
+  var rows = HORARIOS.filter(function(h) {
+    return (tipo === 'live') ? h.tipo === 'live' : h.tipo === tipo;
+  }).map(function(h) {
+    var diasDif = (h.dia - diaSem + 7) % 7;
+    var diff    = diasDif * 1440 + h.h * 60 + h.m - minNow;
+    if (diff <= 0) diff += 7 * 1440;
+    var label   = formatFaltante(diff).toUpperCase();
+    var cerca   = diff <= 15;
+    return '<div style="display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid rgba(255,255,255,0.07);">'
+      + '<span style="font-size:24px;width:32px;text-align:center">' + h.icono + '</span>'
+      + '<div style="flex:1"><div style="font-size:14px;font-weight:600">' + h.nombre + '</div>'
+      + '<div style="font-size:12px;color:var(--dim);margin-top:2px">'
+      + NOMBRES_DIA[h.dia] + ' · ' + (h.h > 12 ? h.h-12 : h.h) + ':' + (h.m < 10 ? '0'+h.m : h.m) + (h.h >= 12 ? ' PM' : ' AM')
+      + '</div></div>'
+      + '<span style="font-size:10px;font-weight:700;letter-spacing:1px;padding:4px 10px;border-radius:20px;'
+      + (cerca ? 'background:rgba(220,50,50,0.2);color:#ff9494;border:1px solid rgba(220,50,50,0.35)'
+               : 'background:rgba(200,168,75,0.12);color:var(--gold);border:1px solid rgba(200,168,75,0.25)')
+      + '">' + label + '</span></div>';
+  }).join('');
+  return '<div style="background:rgba(255,255,255,0.04);border:1px solid rgba(200,168,75,0.2);border-radius:14px;padding:16px 18px;margin-top:4px;">'
+    + '<div style="font-size:11px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:var(--gold);margin-bottom:4px">Próximas reuniones</div>'
+    + rows + '</div>';
+}
+
+function inyectarHorarios(screenId, tipo) {
+  var sc = document.getElementById(screenId);
+  if (!sc) return;
+  var old = sc.querySelector('.sched-block');
+  if (old) old.remove();
+  var fw = sc.querySelector('.live-frame-wrap');
+  if (!fw) return;
+  var div = document.createElement('div');
+  div.className = 'sched-block';
+  div.innerHTML = bloqueHorarios(tipo);
+  fw.insertAdjacentElement('afterend', div);
+}
+
+function quitarHorarios(screenId) {
+  var sc = document.getElementById(screenId);
+  if (sc) { var old = sc.querySelector('.sched-block'); if (old) old.remove(); }
+}
+// ────────────────────────────────────────────────────────────────────────
+
 function loadLive() {
   var raw = liveUrl.trim();
   var url = esUrlValida(raw) ? raw : '';
@@ -573,20 +795,26 @@ function loadLive() {
   var msg    = document.getElementById('liveMsg');
   var btn    = document.getElementById('liveBtnVer');
   var ph     = document.getElementById('livePH');
-  if (!url) {
-    icon.textContent   = '\uD83D\uDD4A\uFE0F';
-    titulo.textContent = 'Sin transmisión activa';
-    msg.textContent    = 'Vuelve pronto para el próximo culto';
-    btn.style.display  = 'none';
-    ph.style.cursor    = 'default';
-    ph.onclick         = null;
+
+  // Si HAY link → mostrar acceso (culto normal o especial, sin importar hora)
+  if (url) {
+    quitarHorarios('s-live');
+    icon.textContent   = '▶️';
+    titulo.textContent = 'Culto en Vivo';
+    msg.textContent    = 'Toca para abrir en YouTube';
+    btn.style.display  = 'inline-block';
+    ph.style.cursor    = 'pointer';
+    ph.onclick         = abrirYoutube;
     return;
   }
-  icon.textContent   = '\u25B6\uFE0F';
-  titulo.textContent = 'Culto en Vivo';
-  msg.textContent    = 'Toca para abrir en YouTube';
-  btn.style.display  = 'inline-block';
-  ph.style.cursor    = 'pointer';
+  // Sin link → mostrar horarios
+  icon.textContent   = '🕊️';
+  titulo.textContent = 'Sin transmisión activa';
+  msg.textContent    = formatFaltante(minParaEvento('live')) + ' para el próximo culto';
+  btn.style.display  = 'none';
+  ph.style.cursor    = 'default';
+  ph.onclick         = null;
+  inyectarHorarios('s-live', 'live');
 }
 
 function abrirYoutube() {
@@ -643,32 +871,115 @@ function mostrarRolMes(num) {
 }
 
 function abrirModal(src) {
-  var img = document.getElementById('imgModalSrc');
   var modal = document.getElementById('imgModal');
+  var img   = document.getElementById('imgModalSrc');
+
   img.src = src;
-  img.style.transform = 'scale(1)';
-  modal.style.display = 'flex';
-  history.pushState({ screen:'modal' }, '');
-  var lastTap = 0;
-  var zoomed = false;
-  img.ontouchend = function(e) {
-    var now = Date.now();
-    if (now - lastTap < 300) {
-      zoomed = !zoomed;
-      img.style.transform = zoomed ? 'scale(2.5)' : 'scale(1)';
-      e.preventDefault();
+  modal.style.display = 'block';
+  modal.style.visibility = 'visible';
+  window._modalAbierto = true;
+
+  // Estado del zoom y pan
+  var scale  = 1;
+  var posX   = 0;
+  var posY   = 0;
+  var startX = 0;
+  var startY = 0;
+  var lastScale  = 1;
+  var startDist  = 0;
+  var isDragging = false;
+  var lastTap    = 0;
+
+  function applyTransform() {
+    img.style.transform = 'translate(calc(-50% + ' + posX + 'px), calc(-50% + ' + posY + 'px)) scale(' + scale + ')';
+  }
+
+  function getDist(t) {
+    var dx = t[0].clientX - t[1].clientX;
+    var dy = t[0].clientY - t[1].clientY;
+    return Math.sqrt(dx*dx + dy*dy);
+  }
+
+  // Resetear al abrir
+  scale = 1; posX = 0; posY = 0;
+  applyTransform();
+
+  modal.addEventListener('touchstart', function(e) {
+    if (e.touches.length === 1) {
+      // Un dedo — preparar drag
+      startX = e.touches[0].clientX - posX;
+      startY = e.touches[0].clientY - posY;
+      isDragging = true;
+
+      // Doble tap para resetear zoom
+      var now = Date.now();
+      if (now - lastTap < 280) {
+        scale = 1; posX = 0; posY = 0;
+        img.style.transition = 'transform 0.2s';
+        applyTransform();
+        setTimeout(function() { img.style.transition = ''; }, 200);
+      }
+      lastTap = now;
     }
-    lastTap = now;
-  };
-  modal.onclick = function(e) { if (e.target === modal) cerrarModal(); };
+    if (e.touches.length === 2) {
+      isDragging = false;
+      startDist  = getDist(e.touches);
+      lastScale  = scale;
+    }
+    e.preventDefault();
+  }, { passive: false });
+
+  modal.addEventListener('touchmove', function(e) {
+    if (e.touches.length === 1 && isDragging && scale > 1) {
+      // Arrastrar imagen solo cuando está ampliada
+      posX = e.touches[0].clientX - startX;
+      posY = e.touches[0].clientY - startY;
+      applyTransform();
+    }
+    if (e.touches.length === 2) {
+      // Pinch zoom
+      var newDist  = getDist(e.touches);
+      var newScale = Math.max(1, Math.min(6, lastScale * (newDist / startDist)));
+      // Punto medio del pinch
+      var midX = (e.touches[0].clientX + e.touches[1].clientX) / 2 - window.innerWidth  / 2;
+      var midY = (e.touches[0].clientY + e.touches[1].clientY) / 2 - window.innerHeight / 2;
+      // Ajustar posición para que el zoom ocurra en el punto del pinch
+      posX = midX + (posX - midX) * (newScale / scale);
+      posY = midY + (posY - midY) * (newScale / scale);
+      scale = newScale;
+      applyTransform();
+    }
+    e.preventDefault();
+  }, { passive: false });
+
+  modal.addEventListener('touchend', function(e) {
+    if (e.touches.length === 0) {
+      isDragging = false;
+      lastScale  = scale;
+      // Si zoom <= 1 centrar
+      if (scale <= 1) {
+        scale = 1; posX = 0; posY = 0;
+        img.style.transition = 'transform 0.2s';
+        applyTransform();
+        setTimeout(function() { img.style.transition = ''; }, 200);
+      }
+    }
+  }, { passive: false });
+
+  // Tap en fondo (no en imagen) cierra
+  modal.addEventListener('click', function(e) {
+    if (e.target === modal && scale <= 1) cerrarModal();
+  });
 }
 
 function cerrarModal() {
   var modal = document.getElementById('imgModal');
-  var img = document.getElementById('imgModalSrc');
+  var img   = document.getElementById('imgModalSrc');
   modal.style.display = 'none';
+  modal.style.visibility = 'hidden';
   img.src = '';
-  img.style.transform = 'scale(1)';
+  img.style.transform = 'translate(-50%, -50%) scale(1)';
+  window._modalAbierto = false;
 }
 
 // ══════════════════════════════════════════
@@ -678,16 +989,54 @@ function renderAnuncios() {
   anunciosReady = true;
   var c = document.getElementById('anunciosCont');
   var lista = (DATA && DATA.anuncios) ? DATA.anuncios : [];
-  if (!lista.length) { c.innerHTML = '<p class="bhint">Sin anuncios por ahora.</p>'; return; }
-  var out = '';
-  lista.forEach(function(a) {
-    out += '<div class="ac" style="margin-bottom:12px">';
-    if (a.fecha)  out += '<div class="ac-fecha">'  + a.fecha  + '</div>';
-    if (a.titulo) out += '<div class="ac-titulo">' + a.titulo + '</div>';
-    if (a.desc)   out += '<div class="ac-desc">'   + a.desc   + '</div>';
-    out += '</div>';
+  if (!lista.length) {
+    c.innerHTML = '<div style="display:flex;flex-direction:column;align-items:center;padding:40px 20px;text-align:center;gap:14px;">'
+      + '<span style="font-size:48px">📭</span>'
+      + '<p style="font-family:\'Cormorant Garamond\',serif;font-size:22px;font-weight:600;color:var(--white);line-height:1.3">No hay anuncios por ahora</p>'
+      + '<p style="font-size:14px;color:var(--dim);line-height:1.65;max-width:260px">Cuando la iglesia publique algo nuevo aparecerá aquí. ¡Vuelve pronto!</p>'
+      + '<div style="width:36px;height:1px;background:linear-gradient(90deg,transparent,var(--gold),transparent)"></div>'
+      + '</div>';
+    return;
+  }
+
+  c.innerHTML = '';
+  lista.forEach(function(a, idx) {
+    var key    = 'anuncio_leido_' + idx + '_' + (a.titulo || '').substring(0, 10);
+    var leido  = localStorage.getItem(key) === '1';
+    var div    = document.createElement('div');
+    div.className = 'ac' + (leido ? ' leido' : '');
+    div.style.marginBottom = '12px';
+
+    var inner = '';
+    if (!leido) inner += '<div class="ac-nuevo">Nuevo</div>';
+    if (a.fecha)  inner += '<div class="ac-fecha">'  + a.fecha  + '</div>';
+    if (a.titulo) inner += '<div class="ac-titulo">' + a.titulo + '</div>';
+    if (a.desc)   inner += '<div class="ac-desc">'   + a.desc   + '</div>';
+    div.innerHTML = inner;
+
+    div.onclick = function() {
+      // Marcar como leído
+      localStorage.setItem(key, '1');
+      div.classList.add('leido');
+      var badge = div.querySelector('.ac-nuevo');
+      if (badge) badge.remove();
+      // Abrir modal
+      abrirAnuncioModal(a);
+    };
+
+    c.appendChild(div);
   });
-  c.innerHTML = out;
+}
+
+function abrirAnuncioModal(a) {
+  document.getElementById('anuncioModalFecha').textContent  = a.fecha  || '';
+  document.getElementById('anuncioModalTitulo').textContent = a.titulo || '';
+  document.getElementById('anuncioModalDesc').textContent   = a.desc   || '';
+  document.getElementById('anuncioModal').style.display = 'flex';
+}
+
+function cerrarAnuncioModal() {
+  document.getElementById('anuncioModal').style.display = 'none';
 }
 
 // ══════════════════════════════════════════
@@ -707,6 +1056,49 @@ if ('serviceWorker' in navigator) {
 // ══════════════════════════════════════════
 //  NOTIFICACIONES PUSH — FIREBASE / CAPACITOR
 // ══════════════════════════════════════════
+// ══════════════════════════════════════════
+//  BOTÓN REGRESAR — @capacitor/app
+// ══════════════════════════════════════════
+async function iniciarBackButton() {
+  try {
+    if (!window.Capacitor || !window.Capacitor.isNativePlatform()) return;
+    var App = window.Capacitor.Plugins.App;
+    if (!App) return;
+    App.addListener('backButton', function(e) {
+      // 1. Modal de imagen abierto
+      var modal = document.getElementById('imgModal');
+      if (modal && modal.style.display !== 'none') {
+        cerrarModal();
+        return;
+      }
+      // 2. Diálogo de salida visible
+      var exitD = document.getElementById('exitDialog');
+      if (exitD && exitD.classList.contains('show')) {
+        exitD.classList.remove('show');
+        return;
+      }
+      // 3. Hay pantallas en el historial
+      if (window.navStack && window.navStack.length > 1) {
+        window.navStack.pop();
+        var prev = window.navStack[window.navStack.length - 1];
+        document.querySelectorAll('.screen').forEach(function(s) {
+          s.classList.remove('active');
+        });
+        var target = document.getElementById(prev);
+        if (target) target.classList.add('active');
+        window.scrollTo(0, 0);
+        if (prev === 's-live') loadLive();
+        if (prev === 's-rol') loadRol();
+        return;
+      }
+      // 4. Estamos en el inicio — mostrar diálogo de salida
+      if (exitD) exitD.classList.add('show');
+    });
+  } catch(e) {
+    console.log('BackButton error:', e);
+  }
+}
+
 async function iniciarNotificaciones() {
   try {
     if (!window.Capacitor || !window.Capacitor.isNativePlatform()) return;
@@ -744,6 +1136,360 @@ async function iniciarNotificaciones() {
 
 boot();
 iniciarNotificaciones();
+iniciarBackButton();
+
+// ══════════════════════════════════════════
+//  PETICIONES DE ORACIÓN — Google Sheet
+// ══════════════════════════════════════════
+
+// ⚠️ Pega aquí la URL de tu Web App después de desplegar el Apps Script
+var PETICIONES_URL = 'https://script.google.com/macros/s/AKfycbwG7bwFlkuMzs2wCl9tsmzrrQyRUnoAG7x6UV-o5IImZkMrl2bCJuCSIHa33aflu7B3/exec';
+
+var ICONOS_CAT = { 'Sanidad':'🌿', 'Trabajo':'💼', 'Conversión':'✝️', 'Otro motivo':'🙏' };
+
+function miIdDispositivo() {
+  var id = localStorage.getItem('dispositivo_id');
+  if (!id) {
+    id = 'dev_' + Date.now() + '_' + Math.random().toString(36).substr(2,6);
+    localStorage.setItem('dispositivo_id', id);
+  }
+  return id;
+}
+
+async function enviarPeticion() {
+  var nombre    = document.getElementById('petNombre').value.trim();
+  var categoria = document.getElementById('petCategoria').value;
+  var texto     = document.getElementById('petTexto').value.trim();
+
+  if (!categoria) { mostrarToast('Por favor selecciona una categoría'); return; }
+  if (!texto)     { mostrarToast('Por favor escribe tu petición'); return; }
+
+  var btn = document.querySelector('#s-peticiones button[onclick="enviarPeticion()"]');
+  if (btn) { btn.textContent = 'Enviando…'; btn.disabled = true; }
+
+  var nueva = {
+    accion:    'agregar',
+    id:        Date.now(),
+    nombre:    nombre || 'Anónimo',
+    categoria: categoria,
+    texto:     texto,
+    fecha:     new Date().toLocaleDateString('es-MX', { day:'numeric', month:'long', year:'numeric' }),
+    dispositivoId: miIdDispositivo()
+  };
+
+  // Guardar dispositivoId localmente para saber cuáles son mías
+  var mias = JSON.parse(localStorage.getItem('mis_peticiones') || '[]');
+  mias.push({ id: nueva.id, dispositivoId: nueva.dispositivoId });
+  localStorage.setItem('mis_peticiones', JSON.stringify(mias));
+
+  try {
+    await fetch(PETICIONES_URL, {
+      method: 'POST',
+      body: JSON.stringify(nueva)
+    });
+    document.getElementById('petNombre').value    = '';
+    document.getElementById('petCategoria').value = '';
+    document.getElementById('petTexto').value     = '';
+    mostrarToast('¡Petición enviada! 🕊️');
+    show('s-motivos');
+  } catch(err) {
+    mostrarToast('Error al enviar, intenta de nuevo');
+  }
+
+  if (btn) { btn.textContent = 'Enviar petición 🕊️'; btn.disabled = false; }
+}
+
+async function marcarRespondida(id) {
+  try {
+    await fetch(PETICIONES_URL, {
+      method: 'POST',
+      body: JSON.stringify({ accion: 'responder', id: id })
+    });
+    mostrarToast('¡Gloria a Dios! 🙌');
+    await cargarYRenderPeticiones();
+  } catch(err) {
+    mostrarToast('Error al actualizar, intenta de nuevo');
+  }
+}
+
+async function cargarYRenderPeticiones() {
+  var cont = document.getElementById('petListaCont');
+  if (!cont) return;
+  cont.innerHTML = '<div class="spin-wrap"><div class="spinner"></div><p class="spin-txt">Cargando peticiones…</p></div>';
+
+  try {
+    var r    = await fetch(PETICIONES_URL + '?accion=listar');
+    var json = await r.json();
+    renderPeticiones(json.peticiones || []);
+  } catch(err) {
+    cont.innerHTML = '<p class="bhint">No se pudieron cargar las peticiones.</p>';
+  }
+}
+
+function esMiPeticion(id) {
+  var mias = JSON.parse(localStorage.getItem('mis_peticiones') || '[]');
+  return mias.some(function(p) { return String(p.id) === String(id); });
+}
+
+function renderPeticiones(lista) {
+  var cont = document.getElementById('petListaCont');
+  if (!cont) return;
+
+  if (!lista.length) {
+    cont.innerHTML = '<div style="display:flex;flex-direction:column;align-items:center;padding:32px 20px;text-align:center;gap:12px;">'
+      + '<span style="font-size:44px">🕊️</span>'
+      + '<p style="font-family:\'Cormorant Garamond\',serif;font-size:20px;font-weight:600;color:var(--white)">No hay peticiones aún</p>'
+      + '<p style="font-size:13px;color:var(--dim);line-height:1.6;max-width:240px">Sé el primero en compartir tu petición de oración con los hermanos.</p>'
+      + '</div>';
+    return;
+  }
+
+  var activas     = lista.filter(function(p){ return !p.respondida; });
+  var respondidas = lista.filter(function(p){ return  p.respondida; });
+  var ordenadas   = activas.concat(respondidas);
+
+  cont.innerHTML = '';
+
+  if (activas.length) {
+    var enc = document.createElement('p');
+    enc.style.cssText = 'font-size:11px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:var(--gold);margin-bottom:2px;';
+    enc.textContent = 'En oración (' + activas.length + ')';
+    cont.appendChild(enc);
+  }
+
+  ordenadas.forEach(function(p, idx) {
+    if (idx === activas.length && respondidas.length) {
+      var sep = document.createElement('p');
+      sep.style.cssText = 'font-size:11px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:rgba(200,168,75,0.45);margin-top:6px;margin-bottom:2px;';
+      sep.textContent = 'Respondidas (' + respondidas.length + ')';
+      cont.appendChild(sep);
+    }
+
+    var esMia = esMiPeticion(p.id);
+    var card  = document.createElement('div');
+    card.style.cssText = p.respondida
+      ? 'background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.07);border-radius:14px;padding:16px;opacity:0.55;margin-bottom:2px;'
+      : 'background:rgba(255,255,255,0.06);border:1px solid rgba(200,168,75,0.2);border-radius:14px;padding:16px;margin-bottom:2px;';
+
+    var icono = ICONOS_CAT[p.categoria] || '🙏';
+    var badge = p.respondida
+      ? '<span style="background:rgba(46,138,87,0.25);color:#7dd9a0;border:1px solid rgba(46,138,87,0.4);font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px;letter-spacing:1px;">✓ RESPONDIDA</span>'
+      : '<span style="background:rgba(200,168,75,0.12);color:var(--gold);border:1px solid rgba(200,168,75,0.25);font-size:10px;font-weight:600;padding:3px 9px;border-radius:20px;">' + icono + ' ' + p.categoria + '</span>';
+
+    var btnRespondida = (esMia && !p.respondida)
+      ? '<button onclick="pedirConfirmRespondida(' + p.id + ')" style="margin-top:12px;width:100%;background:rgba(46,138,87,0.15);border:1px solid rgba(46,138,87,0.4);border-radius:10px;color:#7dd9a0;font-family:\'Outfit\',sans-serif;font-size:13px;font-weight:600;padding:10px;cursor:pointer;">¡Mi oración fue respondida! 🙌</button>'
+      : '';
+
+    card.innerHTML =
+      '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">'
+      + badge
+      + '<span style="font-size:11px;color:var(--dim);">' + p.fecha + '</span>'
+      + '</div>'
+      + '<p style="font-size:15px;line-height:1.7;color:rgba(247,249,245,0.9);margin-bottom:10px;">' + p.texto + '</p>'
+      + '<p style="font-size:12px;color:var(--dim);">— ' + p.nombre + '</p>'
+      + btnRespondida;
+
+    // Tap en la tarjeta abre modal (excepto en el botón respondida)
+    card.style.cursor = 'pointer';
+    card.onclick = function(e) {
+      if (e.target.tagName === 'BUTTON') return;
+      abrirPetModal(p, esMia);
+    };
+
+    cont.appendChild(card);
+  });
+}
+
+var _petIdPendiente = null;
+
+function abrirPetModal(p, esMia) {
+  var icono = ICONOS_CAT[p.categoria] || '🙏';
+  var badge = p.respondida
+    ? '<span style="background:rgba(46,138,87,0.25);color:#7dd9a0;border:1px solid rgba(46,138,87,0.4);font-size:11px;font-weight:700;padding:4px 12px;border-radius:20px;letter-spacing:1px;">✓ RESPONDIDA</span>'
+    : '<span style="background:rgba(200,168,75,0.12);color:var(--gold);border:1px solid rgba(200,168,75,0.25);font-size:11px;font-weight:600;padding:4px 12px;border-radius:20px;">' + icono + ' ' + p.categoria + '</span>';
+
+  document.getElementById('petModalBadge').innerHTML  = badge;
+  document.getElementById('petModalFecha').textContent = p.fecha;
+  document.getElementById('petModalTexto').textContent = p.texto;
+  document.getElementById('petModalAutor').textContent = '— ' + p.nombre;
+
+  var btnDiv = document.getElementById('petModalBtnRespondida');
+  if (esMia && !p.respondida) {
+    btnDiv.innerHTML = '<button onclick="pedirConfirmRespondida(' + p.id + ')" style="width:100%;background:rgba(46,138,87,0.15);border:1px solid rgba(46,138,87,0.4);border-radius:10px;color:#7dd9a0;font-family:\'Outfit\',sans-serif;font-size:14px;font-weight:600;padding:11px;cursor:pointer;margin-bottom:0;">¡Mi oración fue respondida! 🙌</button>';
+  } else {
+    btnDiv.innerHTML = '';
+  }
+
+  document.getElementById('petModal').style.display = 'flex';
+}
+
+function cerrarPetModal() {
+  document.getElementById('petModal').style.display = 'none';
+}
+
+function pedirConfirmRespondida(id) {
+  _petIdPendiente = id;
+  document.getElementById('petModal').style.display = 'none';
+  document.getElementById('petConfirmModal').style.display = 'flex';
+}
+
+function cerrarConfirmModal() {
+  document.getElementById('petConfirmModal').style.display = 'none';
+  _petIdPendiente = null;
+}
+
+async function confirmarRespondida() {
+  document.getElementById('petConfirmModal').style.display = 'none';
+  if (_petIdPendiente !== null) {
+    await marcarRespondida(_petIdPendiente);
+    _petIdPendiente = null;
+  }
+}
+
+// Cargar peticiones al entrar a la pantalla de motivos
+var _showOriginal = show;
+show = function(id) {
+  _showOriginal(id);
+  if (id === 's-motivos') cargarYRenderPeticiones();
+};
+
+// ══════════════════════════════════════════
+//  PETICIONES DE ORACIÓN
+// ══════════════════════════════════════════
+var STORAGE_KEY = 'peticiones_oracion';
+
+function cargarPeticiones() {
+  try {
+    var raw = localStorage.getItem(STORAGE_KEY);
+    return raw ? JSON.parse(raw) : [];
+  } catch(e) { return []; }
+}
+
+function guardarPeticiones(lista) {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(lista)); } catch(e) {}
+}
+
+function miIdDispositivo() {
+  var id = localStorage.getItem('dispositivo_id');
+  if (!id) {
+    id = 'dev_' + Date.now() + '_' + Math.random().toString(36).substr(2,6);
+    localStorage.setItem('dispositivo_id', id);
+  }
+  return id;
+}
+
+function enviarPeticion() {
+  var nombre    = document.getElementById('petNombre').value.trim();
+  var categoria = document.getElementById('petCategoria').value;
+  var texto     = document.getElementById('petTexto').value.trim();
+
+  if (!categoria) { mostrarToast('Por favor selecciona una categoría'); return; }
+  if (!texto)     { mostrarToast('Por favor escribe tu petición'); return; }
+
+  var lista = cargarPeticiones();
+  var nueva = {
+    id:        Date.now(),
+    autor:     nombre || 'Anónimo',
+    categoria: categoria,
+    texto:     texto,
+    fecha:     new Date().toLocaleDateString('es-MX', { day:'numeric', month:'long', year:'numeric' }),
+    respondida: false,
+    dispositivoId: miIdDispositivo()
+  };
+  lista.unshift(nueva);
+  guardarPeticiones(lista);
+
+  // Limpiar formulario
+  document.getElementById('petNombre').value    = '';
+  document.getElementById('petCategoria').value = '';
+  document.getElementById('petTexto').value     = '';
+
+  mostrarToast('¡Petición enviada! 🕊️');
+  renderPeticiones();
+}
+
+var ICONOS_CAT = { 'Sanidad':'🌿', 'Trabajo':'💼', 'Conversión':'✝️', 'Otro motivo':'🙏' };
+
+function renderPeticiones() {
+  var cont  = document.getElementById('petListaCont');
+  if (!cont) return;
+  var lista = cargarPeticiones();
+  var miId  = miIdDispositivo();
+
+  if (!lista.length) {
+    cont.innerHTML = '<div style="display:flex;flex-direction:column;align-items:center;padding:32px 20px;text-align:center;gap:12px;">'
+      + '<span style="font-size:44px">🕊️</span>'
+      + '<p style="font-family:\'Cormorant Garamond\',serif;font-size:20px;font-weight:600;color:var(--white)">No hay peticiones aún</p>'
+      + '<p style="font-size:13px;color:var(--dim);line-height:1.6;max-width:240px">Sé el primero en compartir tu petición de oración con los hermanos.</p>'
+      + '</div>';
+    return;
+  }
+
+  // Activas primero, respondidas al final
+  var activas     = lista.filter(function(p){ return !p.respondida; });
+  var respondidas = lista.filter(function(p){ return  p.respondida; });
+  var ordenadas   = activas.concat(respondidas);
+
+  cont.innerHTML = '';
+
+  // Encabezado sección activas
+  if (activas.length) {
+    var enc = document.createElement('p');
+    enc.style.cssText = 'font-size:11px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:var(--gold);margin-bottom:2px;';
+    enc.textContent = 'En oración (' + activas.length + ')';
+    cont.appendChild(enc);
+  }
+
+  ordenadas.forEach(function(p, idx) {
+    // Separador antes de respondidas
+    if (idx === activas.length && respondidas.length) {
+      var sep = document.createElement('p');
+      sep.style.cssText = 'font-size:11px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:rgba(200,168,75,0.45);margin-top:6px;margin-bottom:2px;';
+      sep.textContent = 'Respondidas (' + respondidas.length + ')';
+      cont.appendChild(sep);
+    }
+
+    var esMia = p.dispositivoId === miId;
+    var card  = document.createElement('div');
+    card.style.cssText = p.respondida
+      ? 'background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.07);border-radius:14px;padding:16px;opacity:0.55;'
+      : 'background:rgba(255,255,255,0.06);border:1px solid rgba(200,168,75,0.2);border-radius:14px;padding:16px;';
+
+    var icono = ICONOS_CAT[p.categoria] || '🙏';
+    var badge = p.respondida
+      ? '<span style="background:rgba(46,138,87,0.25);color:#7dd9a0;border:1px solid rgba(46,138,87,0.4);font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px;letter-spacing:1px;">✓ RESPONDIDA</span>'
+      : '<span style="background:rgba(200,168,75,0.12);color:var(--gold);border:1px solid rgba(200,168,75,0.25);font-size:10px;font-weight:600;padding:3px 9px;border-radius:20px;">' + icono + ' ' + p.categoria + '</span>';
+
+    var btnRespondida = (esMia && !p.respondida)
+      ? '<button onclick="marcarRespondida(' + p.id + ')" style="margin-top:12px;width:100%;background:rgba(46,138,87,0.15);border:1px solid rgba(46,138,87,0.4);border-radius:10px;color:#7dd9a0;font-family:\'Outfit\',sans-serif;font-size:13px;font-weight:600;padding:10px;cursor:pointer;">¡Mi oración fue respondida! 🙌</button>'
+      : '';
+
+    card.innerHTML =
+      '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">'
+      + badge
+      + '<span style="font-size:11px;color:var(--dim);">' + p.fecha + '</span>'
+      + '</div>'
+      + '<p style="font-size:15px;line-height:1.7;color:rgba(247,249,245,0.9);margin-bottom:10px;">' + p.texto + '</p>'
+      + '<p style="font-size:12px;color:var(--dim);">— ' + p.autor + '</p>'
+      + btnRespondida;
+
+    cont.appendChild(card);
+  });
+}
+
+function marcarRespondida(id) {
+  var lista = cargarPeticiones();
+  lista = lista.map(function(p) {
+    if (p.id === id) p.respondida = true;
+    return p;
+  });
+  guardarPeticiones(lista);
+  mostrarToast('¡Gloria a Dios! 🙌');
+  renderPeticiones();
+}
+
+// Cargar peticiones al entrar a la pantalla
+// show para peticiones se maneja abajo
 </script>
 
 <!-- TOAST -->
