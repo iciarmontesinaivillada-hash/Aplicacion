@@ -1160,12 +1160,15 @@ function miIdDispositivo() {
 }
 
 function llamarScript(params) {
-  var qs = Object.keys(params).map(function(k) {
-    return encodeURIComponent(k) + '=' + encodeURIComponent(params[k]);
-  }).join('&');
-  return fetch(PETICIONES_URL + '?' + qs, {
-    redirect: 'follow',
-    mode: 'no-cors'
+  return new Promise(function(resolve) {
+    var qs = Object.keys(params).map(function(k) {
+      return encodeURIComponent(k) + '=' + encodeURIComponent(params[k]);
+    }).join('&');
+    // Usar Image tag — nunca bloqueado por Capacitor ni CORS
+    var img = new Image();
+    img.onload  = function() { resolve({ ok: true }); };
+    img.onerror = function() { resolve({ ok: true }); }; // Google devuelve JSON no imagen, da error pero SÍ ejecutó
+    img.src = PETICIONES_URL + '?' + qs + '&t=' + Date.now();
   });
 }
 
