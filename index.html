@@ -1160,21 +1160,12 @@ function miIdDispositivo() {
 }
 
 function llamarScript(params) {
-  return new Promise(function(resolve) {
-    var cbName = 'cb_' + Date.now();
-    var script = document.createElement('script');
-    params.callback = cbName;
-    var qs = Object.keys(params).map(function(k) {
-      return encodeURIComponent(k) + '=' + encodeURIComponent(params[k]);
-    }).join('&');
-    window[cbName] = function(data) {
-      delete window[cbName];
-      document.body.removeChild(script);
-      resolve(data);
-    };
-    script.src = PETICIONES_URL + '?' + qs;
-    script.onerror = function() { resolve({ ok: false }); };
-    document.body.appendChild(script);
+  var qs = Object.keys(params).map(function(k) {
+    return encodeURIComponent(k) + '=' + encodeURIComponent(params[k]);
+  }).join('&');
+  return fetch(PETICIONES_URL + '?' + qs, {
+    redirect: 'follow',
+    mode: 'no-cors'
   });
 }
 
@@ -1233,7 +1224,10 @@ async function cargarYRenderPeticiones() {
   cont.innerHTML = '<div class="spin-wrap"><div class="spinner"></div><p class="spin-txt">Cargando peticiones…</p></div>';
 
   try {
-    var r    = await fetch(PETICIONES_URL + '?accion=listar');
+    var r    = await fetch(PETICIONES_URL + '?accion=listar', {
+      redirect: 'follow',
+      mode: 'cors'
+    });
     var json = await r.json();
     renderPeticiones(json.peticiones || []);
   } catch(err) {
