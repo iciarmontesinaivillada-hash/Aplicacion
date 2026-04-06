@@ -344,14 +344,17 @@
       <p style="font-size:12px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:var(--gold);">Nueva petición</p>
       <input id="petNombre" type="text" placeholder="Tu nombre (opcional)"
         style="background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.12);border-radius:10px;color:var(--white);font-family:'Outfit',sans-serif;font-size:14px;padding:11px 14px;outline:none;width:100%;" />
-      <select id="petCategoria"
-        style="background:#0b3520;border:1px solid rgba(255,255,255,0.12);border-radius:10px;color:var(--white);font-family:'Outfit',sans-serif;font-size:14px;padding:11px 14px;outline:none;width:100%;-webkit-appearance:none;appearance:none;">
-        <option value="">— Categoría —</option>
-        <option value="Sanidad">🌿 Sanidad</option>
-        <option value="Trabajo">💼 Trabajo</option>
-        <option value="Conversión">✝️ Conversión</option>
-        <option value="Otro motivo">🙏 Otro motivo</option>
-      </select>
+      <div style="position:relative;width:100%;">
+        <select id="petCategoria"
+          style="background:rgba(255,255,255,0.10);border:1px solid rgba(200,168,75,0.4);border-radius:10px;color:var(--white);font-family:'Outfit',sans-serif;font-size:14px;padding:11px 40px 11px 14px;outline:none;width:100%;-webkit-appearance:none;appearance:none;">
+          <option value="" style="background:#0b3520;">— Categoría —</option>
+          <option value="Sanidad" style="background:#0b3520;">🌿 Sanidad</option>
+          <option value="Trabajo" style="background:#0b3520;">💼 Trabajo</option>
+          <option value="Conversión" style="background:#0b3520;">✝️ Conversión</option>
+          <option value="Otro motivo" style="background:#0b3520;">🙏 Otro motivo</option>
+        </select>
+        <span style="position:absolute;right:14px;top:50%;transform:translateY(-50%);color:var(--gold);font-size:12px;pointer-events:none;">▼</span>
+      </div>
       <textarea id="petTexto" placeholder="Escribe tu petición aquí…" rows="5"
         style="background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.12);border-radius:10px;color:var(--white);font-family:'Outfit',sans-serif;font-size:14px;padding:11px 14px;outline:none;width:100%;resize:none;line-height:1.6;"></textarea>
       <button onclick="enviarPeticion()"
@@ -1270,37 +1273,48 @@ function renderPeticiones(lista) {
     }
 
     var esMia = esMiPeticion(p.id);
-    var card  = document.createElement('div');
-    card.style.cssText = p.respondida
-      ? 'background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.07);border-radius:14px;padding:16px;opacity:0.55;margin-bottom:2px;'
-      : 'background:rgba(255,255,255,0.06);border:1px solid rgba(200,168,75,0.2);border-radius:14px;padding:16px;margin-bottom:2px;';
-
     var icono = ICONOS_CAT[p.categoria] || '🙏';
-    var badge = p.respondida
-      ? '<span style="background:rgba(46,138,87,0.25);color:#7dd9a0;border:1px solid rgba(46,138,87,0.4);font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px;letter-spacing:1px;">✓ RESPONDIDA</span>'
-      : '<span style="background:rgba(200,168,75,0.12);color:var(--gold);border:1px solid rgba(200,168,75,0.25);font-size:10px;font-weight:600;padding:3px 9px;border-radius:20px;">' + icono + ' ' + p.categoria + '</span>';
 
-    var btnRespondida = (esMia && !p.respondida)
-      ? '<button onclick="pedirConfirmRespondida(' + p.id + ')" style="margin-top:12px;width:100%;background:rgba(46,138,87,0.15);border:1px solid rgba(46,138,87,0.4);border-radius:10px;color:#7dd9a0;font-family:\'Outfit\',sans-serif;font-size:13px;font-weight:600;padding:10px;cursor:pointer;">¡Mi oración fue respondida! 🙌</button>'
-      : '';
+    // Tarjeta
+    var card = document.createElement('div');
+    card.style.cssText = p.respondida
+      ? 'background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.07);border-radius:14px;padding:16px;opacity:0.55;margin-bottom:2px;cursor:pointer;'
+      : 'background:rgba(255,255,255,0.06);border:1px solid rgba(200,168,75,0.2);border-radius:14px;padding:16px;margin-bottom:2px;cursor:pointer;';
 
-    card.innerHTML =
-      '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">'
-      + badge
-      + '<span style="font-size:11px;color:var(--dim);">' + p.fecha + '</span>'
-      + '</div>'
-      + '<p style="font-size:15px;line-height:1.7;color:rgba(247,249,245,0.9);margin-bottom:10px;">' + p.texto + '</p>'
-      + '<p style="font-size:12px;color:var(--dim);">— ' + p.nombre + '</p>'
-      + btnRespondida;
+    // Fila superior: badge + fecha
+    var fila = document.createElement('div');
+    fila.style.cssText = 'display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;';
 
-    // Tap en la tarjeta abre modal (excepto en el botón respondida)
-    card.style.cursor = 'pointer';
-    (function(peticion, esMiaPet) {
-      card.onclick = function(e) {
-        if (e.target.tagName === 'BUTTON') return;
-        abrirPetModal(peticion, esMiaPet);
-      };
-    })(p, esMia);
+    var badge = document.createElement('span');
+    badge.style.cssText = p.respondida
+      ? 'background:rgba(46,138,87,0.25);color:#7dd9a0;border:1px solid rgba(46,138,87,0.4);font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px;letter-spacing:1px;'
+      : 'background:rgba(200,168,75,0.12);color:var(--gold);border:1px solid rgba(200,168,75,0.25);font-size:10px;font-weight:600;padding:3px 9px;border-radius:20px;';
+    badge.textContent = p.respondida ? '✓ RESPONDIDA' : icono + ' ' + p.categoria;
+
+    var fecha = document.createElement('span');
+    fecha.style.cssText = 'font-size:11px;color:var(--dim);';
+    fecha.textContent = p.fecha;
+
+    fila.appendChild(badge);
+    fila.appendChild(fecha);
+    card.appendChild(fila);
+
+    // Texto
+    var texto = document.createElement('p');
+    texto.style.cssText = 'font-size:15px;line-height:1.7;color:rgba(247,249,245,0.9);margin-bottom:10px;';
+    texto.textContent = p.texto;
+    card.appendChild(texto);
+
+    // Autor
+    var autor = document.createElement('p');
+    autor.style.cssText = 'font-size:12px;color:var(--dim);';
+    autor.textContent = '— ' + p.nombre;
+    card.appendChild(autor);
+
+    // Onclick de la tarjeta — captura p y esMia correctamente
+    card.addEventListener('click', (function(peticion, esMiaPet) {
+      return function() { abrirPetModal(peticion, esMiaPet); };
+    })(p, esMia));
 
     cont.appendChild(card);
   });
@@ -1310,20 +1324,25 @@ var _petIdPendiente = null;
 
 function abrirPetModal(p, esMia) {
   var icono = ICONOS_CAT[p.categoria] || '🙏';
-  var badge = p.respondida
-    ? '<span style="background:rgba(46,138,87,0.25);color:#7dd9a0;border:1px solid rgba(46,138,87,0.4);font-size:11px;font-weight:700;padding:4px 12px;border-radius:20px;letter-spacing:1px;">✓ RESPONDIDA</span>'
-    : '<span style="background:rgba(200,168,75,0.12);color:var(--gold);border:1px solid rgba(200,168,75,0.25);font-size:11px;font-weight:600;padding:4px 12px;border-radius:20px;">' + icono + ' ' + p.categoria + '</span>';
 
-  document.getElementById('petModalBadge').innerHTML  = badge;
+  var badgeEl = document.getElementById('petModalBadge');
+  badgeEl.textContent = p.respondida ? '✓ RESPONDIDA' : icono + ' ' + p.categoria;
+  badgeEl.style.cssText = p.respondida
+    ? 'display:inline-block;background:rgba(46,138,87,0.25);color:#7dd9a0;border:1px solid rgba(46,138,87,0.4);font-size:11px;font-weight:700;padding:4px 12px;border-radius:20px;letter-spacing:1px;margin-bottom:14px;'
+    : 'display:inline-block;background:rgba(200,168,75,0.12);color:var(--gold);border:1px solid rgba(200,168,75,0.25);font-size:11px;font-weight:600;padding:4px 12px;border-radius:20px;margin-bottom:14px;';
+
   document.getElementById('petModalFecha').textContent = p.fecha;
   document.getElementById('petModalTexto').textContent = p.texto;
   document.getElementById('petModalAutor').textContent = '— ' + p.nombre;
 
   var btnDiv = document.getElementById('petModalBtnRespondida');
+  btnDiv.innerHTML = '';
   if (esMia && !p.respondida) {
-    btnDiv.innerHTML = '<button onclick="pedirConfirmRespondida(' + p.id + ')" style="width:100%;background:rgba(46,138,87,0.15);border:1px solid rgba(46,138,87,0.4);border-radius:10px;color:#7dd9a0;font-family:\'Outfit\',sans-serif;font-size:14px;font-weight:600;padding:11px;cursor:pointer;margin-bottom:0;">¡Mi oración fue respondida! 🙌</button>';
-  } else {
-    btnDiv.innerHTML = '';
+    var btn = document.createElement('button');
+    btn.textContent = '¡Mi oración fue respondida! 🙌';
+    btn.style.cssText = 'width:100%;background:rgba(46,138,87,0.15);border:1px solid rgba(46,138,87,0.4);border-radius:10px;color:#7dd9a0;font-family:\'Outfit\',sans-serif;font-size:14px;font-weight:600;padding:11px;cursor:pointer;margin-bottom:12px;';
+    btn.addEventListener('click', function() { pedirConfirmRespondida(p.id); });
+    btnDiv.appendChild(btn);
   }
 
   document.getElementById('petModal').style.display = 'flex';
