@@ -1146,7 +1146,7 @@ iniciarBackButton();
 // ══════════════════════════════════════════
 
 // ⚠️ Pega aquí la URL de tu Web App después de desplegar el Apps Script
-var PETICIONES_URL = 'https://script.google.com/macros/s/AKfycbwCLikR7MryuZZim8M7eos2oxUl5uRq98rZLEVAxERScDS9s3-reNhdXZ55Wn2gUZ7p/exec';
+var PETICIONES_URL = 'https://script.google.com/macros/s/AKfycbwzH9zMYRxmY760Ltok3LaFPV91UHB7SiNmyv83jwLo-GpbvPPcAaIIvuvjmVXtk0XD/exec';
 
 var ICONOS_CAT = { 'Sanidad':'🌿', 'Trabajo':'💼', 'Conversión':'✝️', 'Otro motivo':'🙏' };
 
@@ -1157,6 +1157,25 @@ function miIdDispositivo() {
     localStorage.setItem('dispositivo_id', id);
   }
   return id;
+}
+
+function llamarScript(params) {
+  return new Promise(function(resolve) {
+    var cbName = 'cb_' + Date.now();
+    var script = document.createElement('script');
+    params.callback = cbName;
+    var qs = Object.keys(params).map(function(k) {
+      return encodeURIComponent(k) + '=' + encodeURIComponent(params[k]);
+    }).join('&');
+    window[cbName] = function(data) {
+      delete window[cbName];
+      document.body.removeChild(script);
+      resolve(data);
+    };
+    script.src = PETICIONES_URL + '?' + qs;
+    script.onerror = function() { resolve({ ok: false }); };
+    document.body.appendChild(script);
+  });
 }
 
 async function enviarPeticion() {
@@ -1173,22 +1192,19 @@ async function enviarPeticion() {
   var id    = Date.now();
   var fecha = new Date().toLocaleDateString('es-MX', { day:'numeric', month:'long', year:'numeric' });
 
-  // Guardar localmente para saber cuáles son mías
   var mias = JSON.parse(localStorage.getItem('mis_peticiones') || '[]');
   mias.push({ id: id });
   localStorage.setItem('mis_peticiones', JSON.stringify(mias));
 
-  var params = new URLSearchParams({
-    accion:    'agregar',
-    id:        id,
-    nombre:    nombre || 'Anónimo',
-    categoria: categoria,
-    texto:     texto,
-    fecha:     fecha
-  });
-
   try {
-    await fetch(PETICIONES_URL + '?' + params.toString(), { mode: 'no-cors' });
+    await llamarScript({
+      accion:    'agregar',
+      id:        id,
+      nombre:    nombre || 'Anónimo',
+      categoria: categoria,
+      texto:     texto,
+      fecha:     fecha
+    });
     document.getElementById('petNombre').value    = '';
     document.getElementById('petCategoria').value = '';
     document.getElementById('petTexto').value     = '';
@@ -1202,9 +1218,8 @@ async function enviarPeticion() {
 }
 
 async function marcarRespondida(id) {
-  var params = new URLSearchParams({ accion: 'responder', id: id });
   try {
-    await fetch(PETICIONES_URL + '?' + params.toString(), { mode: 'no-cors' });
+    await llamarScript({ accion: 'responder', id: id });
     mostrarToast('¡Gloria a Dios! 🙌');
     await cargarYRenderPeticiones();
   } catch(err) {
