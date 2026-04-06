@@ -371,6 +371,17 @@
   <div class="screen" id="s-motivos" style="gap:13px;overflow-y:auto;padding-bottom:40px;">
     <button class="back" onclick="show('s-home')">← Inicio</button>
     <div class="sh"><h2>Motivos de Oración</h2><div class="sh-line"></div></div>
+    <!-- Pestañas -->
+    <div style="display:flex;border-bottom:1px solid rgba(255,255,255,0.1);margin-bottom:4px;width:100%;">
+      <button id="tabActiva" data-activa="true" onclick="cambiarTab(true)"
+        style="flex:1;padding:10px;border:none;border-bottom:2px solid var(--gold);background:transparent;color:var(--gold);font-family:Outfit,sans-serif;font-size:13px;font-weight:600;cursor:pointer;">
+        🙏 En oración
+      </button>
+      <button id="tabRespondida" onclick="cambiarTab(false)"
+        style="flex:1;padding:10px;border:none;border-bottom:2px solid transparent;background:transparent;color:var(--dim);font-family:Outfit,sans-serif;font-size:13px;cursor:pointer;">
+        ✅ Respondidas
+      </button>
+    </div>
     <div id="petListaCont" style="display:flex;flex-direction:column;gap:10px;width:100%;"></div>
   </div>
 
@@ -1141,14 +1152,14 @@ boot();
 iniciarNotificaciones();
 iniciarBackButton();
 
-// ══════════════════════════════════════════
-//  PETICIONES DE ORACIÓN — Google Sheet
-// ══════════════════════════════════════════
 
-// ⚠️ Pega aquí la URL de tu Web App después de desplegar el Apps Script
-var PETICIONES_URL = 'https://script.google.com/macros/s/AKfycbwzH9zMYRxmY760Ltok3LaFPV91UHB7SiNmyv83jwLo-GpbvPPcAaIIvuvjmVXtk0XD/exec';
-
-var ICONOS_CAT = { 'Sanidad':'🌿', 'Trabajo':'💼', 'Conversión':'✝️', 'Otro motivo':'🙏' };
+// ══════════════════════════════════════════
+//  PETICIONES DE ORACIÓN — Firebase Firestore
+// ══════════════════════════════════════════
+var FS_PROJECT  = 'iciar-villada-d7f9b';
+var FS_BASE     = 'https://firestore.googleapis.com/v1/projects/' + FS_PROJECT + '/databases/(default)/documents/peticiones';
+var FS_API_KEY  = 'AIzaSyB4BVmaLeReu_USjx737JHUDPV7dbq2gJw';
+var ICONOS_CAT  = { 'Sanidad':'🌿', 'Trabajo':'💼', 'Conversión':'✝️', 'Otro motivo':'🙏' };
 
 function miIdDispositivo() {
   var id = localStorage.getItem('dispositivo_id');
@@ -1159,17 +1170,39 @@ function miIdDispositivo() {
   return id;
 }
 
-function llamarScript(params) {
-  return new Promise(function(resolve) {
-    var qs = Object.keys(params).map(function(k) {
-      return encodeURIComponent(k) + '=' + encodeURIComponent(params[k]);
-    }).join('&');
-    // Usar Image tag — nunca bloqueado por Capacitor ni CORS
-    var img = new Image();
-    img.onload  = function() { resolve({ ok: true }); };
-    img.onerror = function() { resolve({ ok: true }); }; // Google devuelve JSON no imagen, da error pero SÍ ejecutó
-    img.src = PETICIONES_URL + '?' + qs + '&t=' + Date.now();
-  });
+function esMiPeticion(dispositivoId) {
+  return dispositivoId === miIdDispositivo();
+}
+
+// Convierte documento Firestore a objeto simple
+function fsDoc(doc) {
+  var f = doc.fields || {};
+  return {
+    docId:       doc.name.split('/').pop(),
+    id:          f.id          ? f.id.stringValue          : '',
+    nombre:      f.nombre      ? f.nombre.stringValue      : 'Anónimo',
+    categoria:   f.categoria   ? f.categoria.stringValue   : '',
+    texto:       f.texto       ? f.texto.stringValue       : '',
+    fecha:       f.fecha       ? f.fecha.stringValue       : '',
+    respondida:  f.respondida  ? f.respondida.booleanValue : false,
+    dispositivoId: f.dispositivoId ? f.dispositivoId.stringValue : ''
+  };
+}
+
+async function cargarYRenderPeticiones() {
+  var cont = document.getElementById('petListaCont');
+  if (!cont) return;
+  cont.innerHTML = '<div class="spin-wrap"><div class="spinner"></div><p class="spin-txt">Cargando peticiones…</p></div>';
+  try {
+    var r    = await fetch(FS_BASE + '?key=' + FS_API_KEY);
+    var json = await r.json();
+    var docs = (json.documents || []).map(fsDoc);
+    // Ordenar: más recientes primero
+    docs.sort(function(a,b){ return b.id - a.id; });
+    renderPeticiones(docs);
+  } catch(err) {
+    cont.innerHTML = '<p class="bhint">No se pudieron cargar las peticiones.</p>';
+  }
 }
 
 async function enviarPeticion() {
@@ -1183,27 +1216,41 @@ async function enviarPeticion() {
   var btnEnv = document.getElementById('btnEnviarPeticion');
   if (btnEnv) { btnEnv.textContent = 'Enviando…'; btnEnv.disabled = true; }
 
-  var id    = Date.now();
+  var id    = String(Date.now());
   var fecha = new Date().toLocaleDateString('es-MX', { day:'numeric', month:'long', year:'numeric' });
 
+  // Guardar mi id localmente
   var mias = JSON.parse(localStorage.getItem('mis_peticiones') || '[]');
-  mias.push({ id: id });
+  mias.push(id);
   localStorage.setItem('mis_peticiones', JSON.stringify(mias));
 
+  var body = {
+    fields: {
+      id:            { stringValue: id },
+      nombre:        { stringValue: nombre || 'Anónimo' },
+      categoria:     { stringValue: categoria },
+      texto:         { stringValue: texto },
+      fecha:         { stringValue: fecha },
+      respondida:    { booleanValue: false },
+      dispositivoId: { stringValue: miIdDispositivo() }
+    }
+  };
+
   try {
-    await llamarScript({
-      accion:    'agregar',
-      id:        id,
-      nombre:    nombre || 'Anónimo',
-      categoria: categoria,
-      texto:     texto,
-      fecha:     fecha
+    var r = await fetch(FS_BASE + '?key=' + FS_API_KEY, {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify(body)
     });
-    document.getElementById('petNombre').value    = '';
-    document.getElementById('petCategoria').value = '';
-    document.getElementById('petTexto').value     = '';
-    mostrarToast('¡Petición enviada! 🕊️');
-    show('s-motivos');
+    if (r.ok) {
+      document.getElementById('petNombre').value    = '';
+      document.getElementById('petCategoria').value = '';
+      document.getElementById('petTexto').value     = '';
+      mostrarToast('¡Petición enviada! 🕊️');
+      show('s-motivos');
+    } else {
+      mostrarToast('Error al enviar, intenta de nuevo');
+    }
   } catch(err) {
     mostrarToast('Error al enviar, intenta de nuevo');
   }
@@ -1211,9 +1258,14 @@ async function enviarPeticion() {
   if (btnEnv) { btnEnv.textContent = 'Enviar petición 🕊️'; btnEnv.disabled = false; }
 }
 
-async function marcarRespondida(id) {
+async function marcarRespondida(docId) {
   try {
-    await llamarScript({ accion: 'responder', id: id });
+    var url = FS_BASE + '/' + docId + '?key=' + FS_API_KEY + '&updateMask.fieldPaths=respondida';
+    await fetch(url, {
+      method:  'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify({ fields: { respondida: { booleanValue: true } } })
+    });
     mostrarToast('¡Gloria a Dios! 🙌');
     await cargarYRenderPeticiones();
   } catch(err) {
@@ -1221,31 +1273,14 @@ async function marcarRespondida(id) {
   }
 }
 
-async function cargarYRenderPeticiones() {
-  var cont = document.getElementById('petListaCont');
-  if (!cont) return;
-  cont.innerHTML = '<div class="spin-wrap"><div class="spinner"></div><p class="spin-txt">Cargando peticiones…</p></div>';
-
-  try {
-    var r    = await fetch(PETICIONES_URL + '?accion=listar', {
-      redirect: 'follow',
-      mode: 'cors'
-    });
-    var json = await r.json();
-    renderPeticiones(json.peticiones || []);
-  } catch(err) {
-    cont.innerHTML = '<p class="bhint">No se pudieron cargar las peticiones.</p>';
-  }
-}
-
-function esMiPeticion(id) {
-  var mias = JSON.parse(localStorage.getItem('mis_peticiones') || '[]');
-  return mias.some(function(p) { return String(p.id) === String(id); });
-}
-
 function renderPeticiones(lista) {
   var cont = document.getElementById('petListaCont');
   if (!cont) return;
+
+  // Separar pestañas activa
+  var tabActiva = document.getElementById('tabActiva');
+  var tabResp   = document.getElementById('tabRespondida');
+  var pestActiva = tabActiva ? tabActiva.dataset.activa !== 'false' : true;
 
   if (!lista.length) {
     cont.innerHTML = '<div style="display:flex;flex-direction:column;align-items:center;padding:32px 20px;text-align:center;gap:12px;">'
@@ -1258,67 +1293,51 @@ function renderPeticiones(lista) {
 
   var activas     = lista.filter(function(p){ return !p.respondida; });
   var respondidas = lista.filter(function(p){ return  p.respondida; });
-  var ordenadas   = activas.concat(respondidas);
+  var mostrar     = pestActiva ? activas : respondidas;
 
   cont.innerHTML = '';
 
-  if (activas.length) {
-    var enc = document.createElement('p');
-    enc.style.cssText = 'font-size:11px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:var(--gold);margin-bottom:2px;';
-    enc.textContent = 'En oración (' + activas.length + ')';
-    cont.appendChild(enc);
+  if (!mostrar.length) {
+    cont.innerHTML = '<p class="bhint">' + (pestActiva ? 'No hay peticiones activas.' : 'No hay peticiones respondidas aún.') + '</p>';
+    return;
   }
 
-  ordenadas.forEach(function(p, idx) {
-    if (idx === activas.length && respondidas.length) {
-      var sep = document.createElement('p');
-      sep.style.cssText = 'font-size:11px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:rgba(200,168,75,0.45);margin-top:6px;margin-bottom:2px;';
-      sep.textContent = 'Respondidas (' + respondidas.length + ')';
-      cont.appendChild(sep);
-    }
-
-    var esMia = esMiPeticion(p.id);
+  mostrar.forEach(function(p) {
+    var esMia = esMiPeticion(p.dispositivoId);
     var icono = ICONOS_CAT[p.categoria] || '🙏';
 
-    // Tarjeta
     var card = document.createElement('div');
     card.style.cssText = p.respondida
-      ? 'background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.07);border-radius:14px;padding:16px;opacity:0.55;margin-bottom:2px;cursor:pointer;'
-      : 'background:rgba(255,255,255,0.06);border:1px solid rgba(200,168,75,0.2);border-radius:14px;padding:16px;margin-bottom:2px;cursor:pointer;';
+      ? 'background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.07);border-radius:14px;padding:16px;margin-bottom:8px;cursor:pointer;'
+      : 'background:rgba(255,255,255,0.06);border:1px solid rgba(200,168,75,0.2);border-radius:14px;padding:16px;margin-bottom:8px;cursor:pointer;';
 
-    // Fila superior: badge + fecha
+    // Fila badge + fecha
     var fila = document.createElement('div');
     fila.style.cssText = 'display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;';
-
     var badge = document.createElement('span');
     badge.style.cssText = p.respondida
-      ? 'background:rgba(46,138,87,0.25);color:#7dd9a0;border:1px solid rgba(46,138,87,0.4);font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px;letter-spacing:1px;'
+      ? 'background:rgba(46,138,87,0.25);color:#7dd9a0;border:1px solid rgba(46,138,87,0.4);font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px;'
       : 'background:rgba(200,168,75,0.12);color:var(--gold);border:1px solid rgba(200,168,75,0.25);font-size:10px;font-weight:600;padding:3px 9px;border-radius:20px;';
     badge.textContent = p.respondida ? '✓ RESPONDIDA' : icono + ' ' + p.categoria;
-
     var fecha = document.createElement('span');
     fecha.style.cssText = 'font-size:11px;color:var(--dim);';
     fecha.textContent = p.fecha;
-
-    fila.appendChild(badge);
-    fila.appendChild(fecha);
+    fila.appendChild(badge); fila.appendChild(fecha);
     card.appendChild(fila);
 
-    // Texto
     var texto = document.createElement('p');
-    texto.style.cssText = 'font-size:15px;line-height:1.7;color:rgba(247,249,245,0.9);margin-bottom:10px;';
+    texto.style.cssText = 'font-size:15px;line-height:1.7;color:rgba(247,249,245,0.9);margin-bottom:8px;';
     texto.textContent = p.texto;
     card.appendChild(texto);
 
-    // Autor
     var autor = document.createElement('p');
     autor.style.cssText = 'font-size:12px;color:var(--dim);';
     autor.textContent = '— ' + p.nombre;
     card.appendChild(autor);
 
-    // Onclick de la tarjeta — captura p y esMia correctamente
-    card.addEventListener('click', (function(peticion, esMiaPet) {
-      return function() { abrirPetModal(peticion, esMiaPet); };
+    // Click abre modal
+    card.addEventListener('click', (function(pet, mia) {
+      return function() { abrirPetModal(pet, mia); };
     })(p, esMia));
 
     cont.appendChild(card);
@@ -1329,36 +1348,30 @@ var _petIdPendiente = null;
 
 function abrirPetModal(p, esMia) {
   var icono = ICONOS_CAT[p.categoria] || '🙏';
-
   var badgeEl = document.getElementById('petModalBadge');
   badgeEl.textContent = p.respondida ? '✓ RESPONDIDA' : icono + ' ' + p.categoria;
   badgeEl.style.cssText = p.respondida
-    ? 'display:inline-block;background:rgba(46,138,87,0.25);color:#7dd9a0;border:1px solid rgba(46,138,87,0.4);font-size:11px;font-weight:700;padding:4px 12px;border-radius:20px;letter-spacing:1px;margin-bottom:14px;'
+    ? 'display:inline-block;background:rgba(46,138,87,0.25);color:#7dd9a0;border:1px solid rgba(46,138,87,0.4);font-size:11px;font-weight:700;padding:4px 12px;border-radius:20px;margin-bottom:14px;'
     : 'display:inline-block;background:rgba(200,168,75,0.12);color:var(--gold);border:1px solid rgba(200,168,75,0.25);font-size:11px;font-weight:600;padding:4px 12px;border-radius:20px;margin-bottom:14px;';
-
   document.getElementById('petModalFecha').textContent = p.fecha;
   document.getElementById('petModalTexto').textContent = p.texto;
   document.getElementById('petModalAutor').textContent = '— ' + p.nombre;
-
   var btnDiv = document.getElementById('petModalBtnRespondida');
   btnDiv.innerHTML = '';
   if (esMia && !p.respondida) {
     var btn = document.createElement('button');
     btn.textContent = '¡Mi oración fue respondida! 🙌';
-    btn.style.cssText = 'width:100%;background:rgba(46,138,87,0.15);border:1px solid rgba(46,138,87,0.4);border-radius:10px;color:#7dd9a0;font-family:\'Outfit\',sans-serif;font-size:14px;font-weight:600;padding:11px;cursor:pointer;margin-bottom:12px;';
-    btn.addEventListener('click', function() { pedirConfirmRespondida(p.id); });
+    btn.style.cssText = 'width:100%;background:rgba(46,138,87,0.15);border:1px solid rgba(46,138,87,0.4);border-radius:10px;color:#7dd9a0;font-family:Outfit,sans-serif;font-size:14px;font-weight:600;padding:11px;cursor:pointer;margin-bottom:12px;';
+    btn.addEventListener('click', function() { pedirConfirmRespondida(p.docId); });
     btnDiv.appendChild(btn);
   }
-
   document.getElementById('petModal').style.display = 'flex';
 }
 
-function cerrarPetModal() {
-  document.getElementById('petModal').style.display = 'none';
-}
+function cerrarPetModal() { document.getElementById('petModal').style.display = 'none'; }
 
-function pedirConfirmRespondida(id) {
-  _petIdPendiente = id;
+function pedirConfirmRespondida(docId) {
+  _petIdPendiente = docId;
   document.getElementById('petModal').style.display = 'none';
   document.getElementById('petConfirmModal').style.display = 'flex';
 }
@@ -1376,149 +1389,26 @@ async function confirmarRespondida() {
   }
 }
 
-// Cargar peticiones al entrar a la pantalla de motivos
+function cambiarTab(activa) {
+  var tabA = document.getElementById('tabActiva');
+  var tabR = document.getElementById('tabRespondida');
+  tabA.dataset.activa = activa;
+  tabA.style.cssText = activa
+    ? 'flex:1;padding:10px;border:none;border-bottom:2px solid var(--gold);background:transparent;color:var(--gold);font-family:Outfit,sans-serif;font-size:13px;font-weight:600;cursor:pointer;'
+    : 'flex:1;padding:10px;border:none;border-bottom:2px solid transparent;background:transparent;color:var(--dim);font-family:Outfit,sans-serif;font-size:13px;cursor:pointer;';
+  tabR.style.cssText = !activa
+    ? 'flex:1;padding:10px;border:none;border-bottom:2px solid var(--gold);background:transparent;color:var(--gold);font-family:Outfit,sans-serif;font-size:13px;font-weight:600;cursor:pointer;'
+    : 'flex:1;padding:10px;border:none;border-bottom:2px solid transparent;background:transparent;color:var(--dim);font-family:Outfit,sans-serif;font-size:13px;cursor:pointer;';
+  cargarYRenderPeticiones();
+}
+
+// Cargar al entrar a s-motivos
 var _showOriginal = show;
 show = function(id) {
   _showOriginal(id);
   if (id === 's-motivos') cargarYRenderPeticiones();
 };
 
-// ══════════════════════════════════════════
-//  PETICIONES DE ORACIÓN
-// ══════════════════════════════════════════
-var STORAGE_KEY = 'peticiones_oracion';
-
-function cargarPeticiones() {
-  try {
-    var raw = localStorage.getItem(STORAGE_KEY);
-    return raw ? JSON.parse(raw) : [];
-  } catch(e) { return []; }
-}
-
-function guardarPeticiones(lista) {
-  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(lista)); } catch(e) {}
-}
-
-function miIdDispositivo() {
-  var id = localStorage.getItem('dispositivo_id');
-  if (!id) {
-    id = 'dev_' + Date.now() + '_' + Math.random().toString(36).substr(2,6);
-    localStorage.setItem('dispositivo_id', id);
-  }
-  return id;
-}
-
-function enviarPeticion() {
-  var nombre    = document.getElementById('petNombre').value.trim();
-  var categoria = document.getElementById('petCategoria').value;
-  var texto     = document.getElementById('petTexto').value.trim();
-
-  if (!categoria) { mostrarToast('Por favor selecciona una categoría'); return; }
-  if (!texto)     { mostrarToast('Por favor escribe tu petición'); return; }
-
-  var lista = cargarPeticiones();
-  var nueva = {
-    id:        Date.now(),
-    autor:     nombre || 'Anónimo',
-    categoria: categoria,
-    texto:     texto,
-    fecha:     new Date().toLocaleDateString('es-MX', { day:'numeric', month:'long', year:'numeric' }),
-    respondida: false,
-    dispositivoId: miIdDispositivo()
-  };
-  lista.unshift(nueva);
-  guardarPeticiones(lista);
-
-  // Limpiar formulario
-  document.getElementById('petNombre').value    = '';
-  document.getElementById('petCategoria').value = '';
-  document.getElementById('petTexto').value     = '';
-
-  mostrarToast('¡Petición enviada! 🕊️');
-  renderPeticiones();
-}
-
-var ICONOS_CAT = { 'Sanidad':'🌿', 'Trabajo':'💼', 'Conversión':'✝️', 'Otro motivo':'🙏' };
-
-function renderPeticiones() {
-  var cont  = document.getElementById('petListaCont');
-  if (!cont) return;
-  var lista = cargarPeticiones();
-  var miId  = miIdDispositivo();
-
-  if (!lista.length) {
-    cont.innerHTML = '<div style="display:flex;flex-direction:column;align-items:center;padding:32px 20px;text-align:center;gap:12px;">'
-      + '<span style="font-size:44px">🕊️</span>'
-      + '<p style="font-family:\'Cormorant Garamond\',serif;font-size:20px;font-weight:600;color:var(--white)">No hay peticiones aún</p>'
-      + '<p style="font-size:13px;color:var(--dim);line-height:1.6;max-width:240px">Sé el primero en compartir tu petición de oración con los hermanos.</p>'
-      + '</div>';
-    return;
-  }
-
-  // Activas primero, respondidas al final
-  var activas     = lista.filter(function(p){ return !p.respondida; });
-  var respondidas = lista.filter(function(p){ return  p.respondida; });
-  var ordenadas   = activas.concat(respondidas);
-
-  cont.innerHTML = '';
-
-  // Encabezado sección activas
-  if (activas.length) {
-    var enc = document.createElement('p');
-    enc.style.cssText = 'font-size:11px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:var(--gold);margin-bottom:2px;';
-    enc.textContent = 'En oración (' + activas.length + ')';
-    cont.appendChild(enc);
-  }
-
-  ordenadas.forEach(function(p, idx) {
-    // Separador antes de respondidas
-    if (idx === activas.length && respondidas.length) {
-      var sep = document.createElement('p');
-      sep.style.cssText = 'font-size:11px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:rgba(200,168,75,0.45);margin-top:6px;margin-bottom:2px;';
-      sep.textContent = 'Respondidas (' + respondidas.length + ')';
-      cont.appendChild(sep);
-    }
-
-    var esMia = p.dispositivoId === miId;
-    var card  = document.createElement('div');
-    card.style.cssText = p.respondida
-      ? 'background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.07);border-radius:14px;padding:16px;opacity:0.55;'
-      : 'background:rgba(255,255,255,0.06);border:1px solid rgba(200,168,75,0.2);border-radius:14px;padding:16px;';
-
-    var icono = ICONOS_CAT[p.categoria] || '🙏';
-    var badge = p.respondida
-      ? '<span style="background:rgba(46,138,87,0.25);color:#7dd9a0;border:1px solid rgba(46,138,87,0.4);font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px;letter-spacing:1px;">✓ RESPONDIDA</span>'
-      : '<span style="background:rgba(200,168,75,0.12);color:var(--gold);border:1px solid rgba(200,168,75,0.25);font-size:10px;font-weight:600;padding:3px 9px;border-radius:20px;">' + icono + ' ' + p.categoria + '</span>';
-
-    var btnRespondida = (esMia && !p.respondida)
-      ? '<button onclick="marcarRespondida(' + p.id + ')" style="margin-top:12px;width:100%;background:rgba(46,138,87,0.15);border:1px solid rgba(46,138,87,0.4);border-radius:10px;color:#7dd9a0;font-family:\'Outfit\',sans-serif;font-size:13px;font-weight:600;padding:10px;cursor:pointer;">¡Mi oración fue respondida! 🙌</button>'
-      : '';
-
-    card.innerHTML =
-      '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">'
-      + badge
-      + '<span style="font-size:11px;color:var(--dim);">' + p.fecha + '</span>'
-      + '</div>'
-      + '<p style="font-size:15px;line-height:1.7;color:rgba(247,249,245,0.9);margin-bottom:10px;">' + p.texto + '</p>'
-      + '<p style="font-size:12px;color:var(--dim);">— ' + p.autor + '</p>'
-      + btnRespondida;
-
-    cont.appendChild(card);
-  });
-}
-
-function marcarRespondida(id) {
-  var lista = cargarPeticiones();
-  lista = lista.map(function(p) {
-    if (p.id === id) p.respondida = true;
-    return p;
-  });
-  guardarPeticiones(lista);
-  mostrarToast('¡Gloria a Dios! 🙌');
-  renderPeticiones();
-}
-
-// Cargar peticiones al entrar a la pantalla
 // show para peticiones se maneja abajo
 </script>
 
