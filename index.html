@@ -357,7 +357,7 @@
       </div>
       <textarea id="petTexto" placeholder="Escribe tu petición aquí…" rows="5"
         style="background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.12);border-radius:10px;color:var(--white);font-family:'Outfit',sans-serif;font-size:14px;padding:11px 14px;outline:none;width:100%;resize:none;line-height:1.6;"></textarea>
-      <button onclick="enviarPeticion()"
+      <button id="btnEnviarPeticion" onclick="enviarPeticion()"
         style="background:var(--gold);border:none;border-radius:12px;color:var(--g-deep);font-family:'Outfit',sans-serif;font-size:14px;font-weight:700;padding:13px;cursor:pointer;width:100%;">
         Enviar petición 🕊️
       </button>
@@ -1146,7 +1146,7 @@ iniciarBackButton();
 // ══════════════════════════════════════════
 
 // ⚠️ Pega aquí la URL de tu Web App después de desplegar el Apps Script
-var PETICIONES_URL = 'https://script.google.com/macros/s/AKfycbwG7bwFlkuMzs2wCl9tsmzrrQyRUnoAG7x6UV-o5IImZkMrl2bCJuCSIHa33aflu7B3/exec';
+var PETICIONES_URL = 'https://script.google.com/macros/s/AKfycbwCLikR7MryuZZim8M7eos2oxUl5uRq98rZLEVAxERScDS9s3-reNhdXZ55Wn2gUZ7p/exec';
 
 var ICONOS_CAT = { 'Sanidad':'🌿', 'Trabajo':'💼', 'Conversión':'✝️', 'Otro motivo':'🙏' };
 
@@ -1167,31 +1167,28 @@ async function enviarPeticion() {
   if (!categoria) { mostrarToast('Por favor selecciona una categoría'); return; }
   if (!texto)     { mostrarToast('Por favor escribe tu petición'); return; }
 
-  var btn = document.querySelector('#s-peticiones button[onclick="enviarPeticion()"]');
-  if (btn) { btn.textContent = 'Enviando…'; btn.disabled = true; }
+  var btnEnv = document.getElementById('btnEnviarPeticion');
+  if (btnEnv) { btnEnv.textContent = 'Enviando…'; btnEnv.disabled = true; }
 
-  var nueva = {
+  var id    = Date.now();
+  var fecha = new Date().toLocaleDateString('es-MX', { day:'numeric', month:'long', year:'numeric' });
+
+  // Guardar localmente para saber cuáles son mías
+  var mias = JSON.parse(localStorage.getItem('mis_peticiones') || '[]');
+  mias.push({ id: id });
+  localStorage.setItem('mis_peticiones', JSON.stringify(mias));
+
+  var params = new URLSearchParams({
     accion:    'agregar',
-    id:        Date.now(),
+    id:        id,
     nombre:    nombre || 'Anónimo',
     categoria: categoria,
     texto:     texto,
-    fecha:     new Date().toLocaleDateString('es-MX', { day:'numeric', month:'long', year:'numeric' }),
-    dispositivoId: miIdDispositivo()
-  };
-
-  // Guardar dispositivoId localmente para saber cuáles son mías
-  var mias = JSON.parse(localStorage.getItem('mis_peticiones') || '[]');
-  mias.push({ id: nueva.id, dispositivoId: nueva.dispositivoId });
-  localStorage.setItem('mis_peticiones', JSON.stringify(mias));
+    fecha:     fecha
+  });
 
   try {
-    await fetch(PETICIONES_URL, {
-      method: 'POST',
-      mode: 'no-cors',
-      headers: { 'Content-Type': 'text/plain' },
-      body: JSON.stringify(nueva)
-    });
+    await fetch(PETICIONES_URL + '?' + params.toString(), { mode: 'no-cors' });
     document.getElementById('petNombre').value    = '';
     document.getElementById('petCategoria').value = '';
     document.getElementById('petTexto').value     = '';
@@ -1201,17 +1198,13 @@ async function enviarPeticion() {
     mostrarToast('Error al enviar, intenta de nuevo');
   }
 
-  if (btn) { btn.textContent = 'Enviar petición 🕊️'; btn.disabled = false; }
+  if (btnEnv) { btnEnv.textContent = 'Enviar petición 🕊️'; btnEnv.disabled = false; }
 }
 
 async function marcarRespondida(id) {
+  var params = new URLSearchParams({ accion: 'responder', id: id });
   try {
-    await fetch(PETICIONES_URL, {
-      method: 'POST',
-      mode: 'no-cors',
-      headers: { 'Content-Type': 'text/plain' },
-      body: JSON.stringify({ accion: 'responder', id: id })
-    });
+    await fetch(PETICIONES_URL + '?' + params.toString(), { mode: 'no-cors' });
     mostrarToast('¡Gloria a Dios! 🙌');
     await cargarYRenderPeticiones();
   } catch(err) {
