@@ -232,6 +232,9 @@
         <button class="cb" onclick="show('s-motivos')">
           <span class="ci">📋</span><span class="cl">Motivos de Oración</span>
         </button>
+        <button class="cb span2" onclick="show('s-escuela')">
+          <span class="ci">📖</span><span class="cl gold">Escuela Dominical</span>
+        </button>
 
       </div>
     </div>
@@ -293,6 +296,15 @@
     </div>
   </div>
 </div>
+
+  <!-- ESCUELA DOMINICAL -->
+  <div class="screen" id="s-escuela" style="gap:10px;padding-bottom:40px;">
+    <button class="back" onclick="show('s-home')">← Inicio</button>
+    <div class="sh"><h2>Escuela Dominical</h2><div class="sh-line"></div></div>
+    <div id="escuelaDestacada"></div>
+    <div id="escuelaMeses" style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;width:100%"></div>
+    <div id="escuelaLista" style="display:flex;flex-direction:column;gap:10px;width:100%"></div>
+  </div>
 
       <!-- ROL MENSUAL -->
   <div class="screen" id="s-rol" style="gap:8px;overflow-y:auto;padding-bottom:40px;">
@@ -470,6 +482,7 @@ const DEMO = {
   liveUrl:'', liveLabel:'Culto en Vivo',
   zoom_url_vanguardia:'', zoom_url_guardia:'',
   roles: ROLES_IMGS,
+  escuela: [],
   anuncios:[
     { fecha:'Domingo',   titulo:'Culto de adoración', desc:'A las 11:00 AM. ¡Te esperamos!' },
     { fecha:'Miércoles', titulo:'Estudio Bíblico',     desc:'7:00 PM. Trae tu Biblia.' }
@@ -500,6 +513,7 @@ function show(id) {
   if (id === 's-anuncios' && !anunciosReady) renderAnuncios();
   if (id === 's-live')             loadLive();
   if (id === 's-rol')              loadRol();
+  if (id === 's-escuela')          loadEscuela();
   if (id === 's-zoom-vanguardia')  loadZoom('zoom_url_vanguardia', 1);
   if (id === 's-zoom-guardia')     loadZoom('zoom_url_guardia', 2);
 }
@@ -658,6 +672,21 @@ async function boot() {
         });
       }
     } catch(eR) {}
+    // Leer pestaña Escuela del Sheet (A: fecha, B: tema, C: enlace)
+    var escuela = [];
+    try {
+      var rE = await fetch('https://sheets.googleapis.com/v4/spreadsheets/'
+        + CFG.sheetId + '/values/Escuela?key=' + CFG.apiKey);
+      if (rE.ok) {
+        var jE = await rE.json();
+        (jE.values || []).forEach(function(row) {
+          var f = parseFecha(row[0]);
+          var link = (row[2] || '').trim();
+          if (f && esUrlValida(link)) escuela.push({ fecha: f, tema: (row[1] || '').trim(), url: link });
+        });
+        escuela.sort(function(a, b) { return a.fecha - b.fecha; });
+      }
+    } catch(eE) {}
     // Combinar: Sheet tiene prioridad, ROLES_IMGS como respaldo
     var rolesFinales = {};
     for (var rm = 1; rm <= 12; rm++) {
@@ -669,6 +698,7 @@ async function boot() {
       zoom_url_vanguardia:  map['zoom_url_vanguardia']   || '',
       zoom_url_guardia:     map['zoom_url_guardia']      || '',
       roles:                rolesFinales,
+      escuela:              escuela,
       anuncios:             anuncios
     };
   } catch(e) { DATA = DEMO; }
@@ -836,6 +866,89 @@ function abrirYoutube() {
   var url = liveUrl.trim();
   if (!url) return;
   window.open(url, '_blank', 'noopener,noreferrer');
+}
+
+// ══════════════════════════════════════════
+//  ESCUELA DOMINICAL
+// ══════════════════════════════════════════
+var MESES_L = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio',
+               'Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+var escuelaMes = 0, escuelaAnio = new Date().getFullYear();
+
+function parseFecha(txt) {
+  if (!txt) return null;
+  txt = String(txt).trim();
+  var m = txt.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);          // 2026-10-11
+  if (m) return new Date(+m[1], +m[2] - 1, +m[3]);
+  m = txt.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);            // 11/10/2026
+  if (m) return new Date(+m[3], +m[2] - 1, +m[1]);
+  return null;
+}
+
+function loadEscuela() {
+  var lista = (DATA && DATA.escuela) || [];
+  var hoy = new Date(); hoy.setHours(0, 0, 0, 0);
+  var prox = lista.find(function(l) { return l.fecha >= hoy; });
+  var ultima = lista[lista.length - 1];
+  var dest = document.getElementById('escuelaDestacada');
+  dest.innerHTML = '';
+  if (prox)        dest.appendChild(tarjetaLeccion(prox, 'Próxima lección · '));
+  else if (ultima) dest.appendChild(tarjetaLeccion(ultima, 'Última lección · '));
+  var ref = prox || ultima;
+  escuelaMes  = ref ? ref.fecha.getMonth()    : hoy.getMonth();
+  escuelaAnio = ref ? ref.fecha.getFullYear() : hoy.getFullYear();
+  buildEscuelaMeses();
+  mostrarEscuelaMes();
+}
+
+function tarjetaLeccion(l, prefijo) {
+  var d = document.createElement('div');
+  d.className = 'ac';
+  var f = document.createElement('div');
+  f.className = 'ac-fecha';
+  f.textContent = (prefijo || '') + 'Domingo ' + l.fecha.getDate() + ' de ' + MESES_L[l.fecha.getMonth()];
+  var t = document.createElement('div');
+  t.className = 'ac-titulo';
+  t.textContent = l.tema || 'Lección';
+  var h = document.createElement('div');
+  h.className = 'ac-desc';
+  h.textContent = '📄 Toca para abrir el PDF';
+  d.appendChild(f); d.appendChild(t); d.appendChild(h);
+  d.onclick = function() { openLink(l.url); };
+  return d;
+}
+
+function buildEscuelaMeses() {
+  var cortos = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+  var grid = document.getElementById('escuelaMeses');
+  var lista = (DATA && DATA.escuela) || [];
+  grid.innerHTML = '';
+  cortos.forEach(function(m, i) {
+    var tiene = lista.some(function(l) {
+      return l.fecha.getFullYear() === escuelaAnio && l.fecha.getMonth() === i;
+    });
+    var b = document.createElement('button');
+    b.textContent = m;
+    b.style.cssText = 'padding:8px 4px;border-radius:10px;font-size:12px;font-weight:500;cursor:pointer;font-family:Outfit,sans-serif;border:1px solid '
+      + (tiene ? 'rgba(200,168,75,0.6)' : 'rgba(255,255,255,0.1)')
+      + ';background:' + (i === escuelaMes ? 'rgba(200,168,75,0.3)' : 'rgba(255,255,255,0.05)')
+      + ';color:' + (tiene ? '#e8c96a' : 'rgba(247,249,245,0.4)') + ';';
+    b.onclick = function() { escuelaMes = i; buildEscuelaMeses(); mostrarEscuelaMes(); };
+    grid.appendChild(b);
+  });
+}
+
+function mostrarEscuelaMes() {
+  var cont = document.getElementById('escuelaLista');
+  var delMes = ((DATA && DATA.escuela) || []).filter(function(l) {
+    return l.fecha.getFullYear() === escuelaAnio && l.fecha.getMonth() === escuelaMes;
+  });
+  cont.innerHTML = '';
+  if (!delMes.length) {
+    cont.innerHTML = '<p class="bhint">No hay lecciones en ' + MESES_L[escuelaMes] + '.</p>';
+    return;
+  }
+  delMes.forEach(function(l) { cont.appendChild(tarjetaLeccion(l)); });
 }
 
 // ══════════════════════════════════════════
