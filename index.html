@@ -306,6 +306,15 @@
     <div id="escuelaLista" style="display:flex;flex-direction:column;gap:10px;width:100%"></div>
   </div>
 
+  <!-- LECCIÓN (páginas) -->
+  <div class="screen" id="s-leccion" style="gap:10px;padding-bottom:40px;">
+    <button class="back" onclick="history.back()">← Escuela Dominical</button>
+    <div class="sh"><h2 id="leccionTitulo">Lección</h2><div class="sh-line"></div></div>
+    <p class="bhint" id="leccionFecha" style="margin:0"></p>
+    <p class="bhint" style="margin:0">Toca una página para hacer zoom.</p>
+    <div id="leccionPaginas" style="display:flex;flex-direction:column;gap:12px;width:100%"></div>
+  </div>
+
       <!-- ROL MENSUAL -->
   <div class="screen" id="s-rol" style="gap:8px;overflow-y:auto;padding-bottom:40px;">
     <button class="back" onclick="show('s-home')" style="margin-bottom:0">← Inicio</button>
@@ -681,8 +690,12 @@ async function boot() {
         var jE = await rE.json();
         (jE.values || []).forEach(function(row) {
           var f = parseFecha(row[0]);
-          var link = (row[2] || '').trim();
-          if (f && esUrlValida(link)) escuela.push({ fecha: f, tema: (row[1] || '').trim(), url: link });
+          if (!f) return;
+          var c = (row[2] || '').trim();
+          var item = { fecha: f, tema: (row[1] || '').trim(), url: '', paginas: 0 };
+          if (/^\d+$/.test(c)) item.paginas = parseInt(c, 10);
+          else if (esUrlValida(c)) item.url = c;
+          escuela.push(item);
         });
         escuela.sort(function(a, b) { return a.fecha - b.fecha; });
       }
@@ -912,10 +925,43 @@ function tarjetaLeccion(l, prefijo) {
   t.textContent = l.tema || 'Lección';
   var h = document.createElement('div');
   h.className = 'ac-desc';
-  h.textContent = '📄 Toca para abrir el PDF';
+  if (l.paginas) {
+    h.textContent = '📖 Toca para leer la lección';
+    d.onclick = function() { abrirLeccion(l); };
+  } else if (l.url) {
+    h.textContent = '📄 Toca para abrir';
+    d.onclick = function() { openLink(l.url); };
+  } else {
+    h.textContent = 'Tema especial a cargo del pastor local';
+    d.style.cursor = 'default';
+  }
   d.appendChild(f); d.appendChild(t); d.appendChild(h);
-  d.onclick = function() { openLink(l.url); };
   return d;
+}
+
+function fechaClave(dt) {
+  return dt.getFullYear() + '-' + ('0' + (dt.getMonth() + 1)).slice(-2) + '-' + ('0' + dt.getDate()).slice(-2);
+}
+
+function abrirLeccion(l) {
+  document.getElementById('leccionTitulo').textContent = l.tema || 'Lección';
+  document.getElementById('leccionFecha').textContent =
+    'Domingo ' + l.fecha.getDate() + ' de ' + MESES_L[l.fecha.getMonth()];
+  var cont = document.getElementById('leccionPaginas');
+  cont.innerHTML = '';
+  var clave = fechaClave(l.fecha);
+  for (var p = 1; p <= l.paginas; p++) {
+    (function(src) {
+      var img = document.createElement('img');
+      img.src = src;
+      img.loading = 'lazy';
+      img.alt = 'Página';
+      img.style.cssText = 'width:100%;border-radius:10px;display:block;background:#fff;cursor:zoom-in;';
+      img.onclick = function() { abrirModal(src); };
+      cont.appendChild(img);
+    })('escuela/' + clave + '-' + p + '.jpg');
+  }
+  show('s-leccion');
 }
 
 function buildEscuelaMeses() {
